@@ -6,7 +6,32 @@
 ##' @return The pathway cluster results in a csv file.
 ##' @authors Zhou Fang, Xiangrui Zeng and George Tseng.
 ##' @export
-MAPE.Clustering <- function(Num_Clusters=3, kappa.result = kappa.result, pathway = all.pathway, enrichment,method,output_dir="./"){
+##' @examples
+##' data(pathways)
+##' data(MetaDEresult)
+##' data(MetaDEresult)
+##' MAPE2.0_result = MAPE2.0(stat='maxP',method = "MAPE", enrichment = "KS", 
+##'                         size.min=15,size.max=500, MetaDE = TRUE,
+##'                         meta.p = meta.res.p$meta.analysis$pval,ind.p = ind.res$p)
+##' MAPE.kappa_result = MAPE.Kappa(summary = MAPE2.0_result$summary, software = MAPE2.0_result$method,
+##'                               pathway = MAPE2.0_result$pathway, max_k = 20, q_cutoff = 0.05,
+##'                               output_dir = tempdir())
+##' genelist = NULL
+##' if (MAPE2.0_result$enrichment == "Fisher's exact" & MAPE2.0_result$method == "CPI"){
+##'  genelist = MAPE2.0_result$genelist
+##' }
+##'
+##' MAPE.Clustering(summary = MAPE2.0_result$summary,Num_Clusters=10,
+##'                Num_of_gene_lists = MAPE2.0_result$Num_of_gene_lists,
+##'                genelist = genelist,kappa.result = MAPE.kappa_result$kappa, 
+##'                pathway = MAPE2.0_result$pathway, enrichment = MAPE2.0_result$enrichment,
+##'                method = MAPE.kappa_result$method,software = MAPE2.0_result$method,
+##'                output_dir = tempdir())
+
+MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.result, Num_of_gene_lists, 
+                            genelist = NULL,pathway = all.pathway, enrichment,method,software,
+                            output_dir = getwd())
+  {
   #module2
   #biocLite("Rgraphviz")
   #biocLite("AnnotationDbi")
@@ -54,19 +79,20 @@ MAPE.Clustering <- function(Num_Clusters=3, kappa.result = kappa.result, pathway
   results <- pam(d, k, diss=T)
   #??pam  
   #b = read.csv("fisher_sum_complete_BP_list.csv", as.is = T, header = T)
-  b = Summary
+  b = summary
 #  if(Num_of_gene_lists==1){
 #    b =cbind(fisher_sum_tmp,fisher_sum_tmp[,3])
 #  }
   
+  dir.create(paste(output_dir,"/Clustering_files",sep=""))
   sil <- silhouette(results$clustering, (1-kappa.result), diss=T)
   summary(sil)
-  pdf(paste(output_dir,"/Secondary_files/silhouette_plot.pdf",sep=""))
+  pdf(paste(output_dir,"/Clustering_files/silhouette_plot.pdf",sep=""))
   plot(sil, nmax= 80, cex.names=0.6)
   dev.off()
   length(results$clustering)
   dim(d)
-  pdf(paste(output_dir,"/Secondary_files/silhouette_width.pdf",sep=""))
+  pdf(paste(output_dir,"/Clustering_files/silhouette_width.pdf",sep=""))
   hist(sil[,3],breaks=30)
   dev.off()  
   
@@ -91,12 +117,12 @@ MAPE.Clustering <- function(Num_Clusters=3, kappa.result = kappa.result, pathway
                                        colnames(new.kappa.result)%in%names(results2)]
     sil <- silhouette(results2, (1-new.kappa.result), diss=T)
   }
-  pdf(paste(output_dir,"/Secondary_files/newsilhouette_plot.pdf",sep=""))
+  pdf(paste(output_dir,"/Clustering_files/new_silhouette_plot.pdf",sep=""))
   plot(sil, nmax= 80, cex.names=0.6)
   dev.off()
   length(results$clustering)
   dim(d)
-  pdf(paste(output_dir,"/Secondary_files/newsilhouette_width.pdf",sep=""))
+  pdf(paste(output_dir,"/Clustering_files/new_silhouette_width.pdf",sep=""))
   hist(sil[,3],breaks=30)
   dev.off() 
   
@@ -215,7 +241,7 @@ MAPE.Clustering <- function(Num_Clusters=3, kappa.result = kappa.result, pathway
   #========================================================================================
   #heatmap for each cluster, based on kappa similarity and put number of overlapped genes
   #========================================================================================
-  dir.create(paste(output_dir,"/Secondary_files/Heatmaps",sep=""))
+  dir.create(paste(output_dir,"/Clustering_files/Heatmaps",sep=""))
   order.list = list()
   #  order.list.all
   last_max <-0
@@ -224,9 +250,9 @@ MAPE.Clustering <- function(Num_Clusters=3, kappa.result = kappa.result, pathway
     e = names(which(results2 == i))
     temp_file_name <- output_dir
     if( i!=k){
-      temp_file_name <- paste(output_dir,"/Secondary_files/Heatmaps/Heatmap_each_cluster_kappa_number_overlap_genes_", i, ".pdf", sep = "")
+      temp_file_name <- paste(output_dir,"/Clustering_files/Heatmaps/Heatmap_each_cluster_kappa_number_overlap_genes_", i, ".pdf", sep = "")
     } else{
-      temp_file_name <- paste(output_dir,"/Secondary_files/Heatmaps/Heatmap_each_cluster_kappa_number_overlap_genes_Singleton", ".pdf", sep = "")
+      temp_file_name <- paste(output_dir,"/Clustering_files/Heatmaps/Heatmap_each_cluster_kappa_number_overlap_genes_Singleton", ".pdf", sep = "")
     }
     pdf(temp_file_name ,height = if (length(e)<=40) 7 
         else if (length(e)<=100) 10 
@@ -382,7 +408,7 @@ MAPE.Clustering <- function(Num_Clusters=3, kappa.result = kappa.result, pathway
           for (j in 1: length(e)){
             NumGeneTotalInSet[j] <- length(pathway[[e[j]]])
           }
-          m = Summary[e,method]
+          m = summary[e,method]
           h = cbind(f, NumGeneTotalInSet,m)
         }
         else if (software == "CPI"){
@@ -391,7 +417,7 @@ MAPE.Clustering <- function(Num_Clusters=3, kappa.result = kappa.result, pathway
             for (j in 1: length(e)){
               NumGeneTotalInSet[j] <- length(pathway[[e[j]]])
             }
-            m = Summary[e,3:ncol(Summary)]
+            m = summary[e,3:ncol(summary)]
             h = cbind(f, NumGeneTotalInSet,m)
           }
           else if (enrichment == "Fisher's exact"){
@@ -662,7 +688,7 @@ MAPE.Clustering <- function(Num_Clusters=3, kappa.result = kappa.result, pathway
     Xj[j] <- exp(-alpha * sum(new.fmat[,j]))
   }
   
-  dir.create(paste(output_dir,"/Secondary_files/text_mining",sep=""))
+#  dir.create(paste(output_dir,"/Clustering_files/text_mining",sep=""))
   #names(Reactomegenesets)
   #which(names(pathway)=="GOBP PROTEIN TETRAMERIZATION")
   #which(names(pathway)=="BIOCARTA TID PATHWAY")
@@ -818,10 +844,10 @@ MAPE.Clustering <- function(Num_Clusters=3, kappa.result = kappa.result, pathway
       colnames(tm_all[[tmk]]) <- c("words","perm_p","perm_q","Fisher_p","Fisher_q","perm_rank","Fisher_rank","count")
       
       
-      pdf(paste(output_dir,"/Secondary_files/text_mining/compare_two_tests",tmk,".pdf",sep=""))
-      permp <- allp
-      plot(-log(fisherp),-log(permp))
-      dev.off()
+#      pdf(paste(output_dir,"/Secondary_files/text_mining/compare_two_tests",tmk,".pdf",sep=""))
+#      permp <- allp
+#      plot(-log(fisherp),-log(permp))
+#      dev.off()
     } else{
       tm_all[[tmk]] <- cbind(NA,NA,NA,NA,NA,NA,NA,NA)
       colnames(tm_all[[tmk]]) <- c("words","perm_p","perm_q","Fisher_p","Fisher_q","perm_rank","Fisher_rank","count")

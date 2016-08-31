@@ -4,8 +4,8 @@
 \alias{MAPE.Kappa}
 \title{Calculate the kappa statistics for DE Pathways}
 \usage{
-MAPE.Kappa(summary = summary, max_k = 20, pathway, software = c("CPI",
-  "MAPE"), method = c("MAPE_I", "MAPE_G", "MAPE_P"), q_cutoff = 0.1,
+MAPE.Kappa(summary, max_k = 20, pathway, software = c("CPI", "MAPE"),
+  method = c("MAPE_I", "MAPE_G", "MAPE_P"), q_cutoff = 0.1,
   output_dir = getwd())
 }
 \arguments{

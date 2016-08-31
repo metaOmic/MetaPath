@@ -357,7 +357,7 @@ MAPE2.0<-function (arraydata = NULL, clinical.data = NULL, label = NULL,censorin
 #      dir.create(output_dir)
 #      dir.create(paste(output_dir,"/Secondary_files",sep="")) 
       return(list(summary = qvalue.all, qvalue = qvalue.all, pvalue = pvalue.all,pathway = pathway,
-                  Num_of_gene_lists = study.no ,method = method,enichment = enrichment))
+                  Num_of_gene_lists = study.no ,method = method,enrichment = enrichment))
     
     }
     else {
@@ -599,7 +599,7 @@ MAPE2.0<-function (arraydata = NULL, clinical.data = NULL, label = NULL,censorin
 #      dir.create(output_dir)
 #      dir.create(paste(output_dir,"/Secondary_files",sep="")) 
       return(list(summary = qvalue.all, qvalue = qvalue.all, pvalue = pvalue.all,pathway = pathway,
-                  Num_of_gene_lists = length(study),method = method,enichment = enrichment
+                  Num_of_gene_lists = length(study),method = method,enrichment = enrichment
                   ))
     }
     }

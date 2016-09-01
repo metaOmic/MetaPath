@@ -17,7 +17,7 @@
 ##'                         size.min=15,size.max=500, MetaDE = TRUE,
 ##'                         meta.p = meta.res.p$meta.analysis$pval,ind.p = ind.res$p)
 ##' MAPE.kappa_result = MAPE.Kappa(summary = MAPE2.0_result$summary, software = MAPE2.0_result$method,
-##'                                pathway = MAPE2.0_result$pathway, max_k = 20, q_cutoff = 0.1,
+##'                                pathway = MAPE2.0_result$pathway, max_k = 20, q_cutoff = 0.05,
 ##'                                output_dir = tempdir())
 
 

@@ -5,8 +5,8 @@
 \title{Output pathway cluster results}
 \usage{
 MAPE.Clustering(summary, Num_Clusters = 3, kappa.result = kappa.result,
-  Num_of_gene_lists, genelist = NULL, pathway = all.pathway, enrichment,
-  method, software, output_dir = getwd())
+  Num_of_gene_lists, genelist = NULL, pathway, enrichment, method, software,
+  output_dir = getwd())
 }
 \arguments{
 \item{Num_Clusters}{number of clusters}

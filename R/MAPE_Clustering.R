@@ -29,7 +29,7 @@
 ##'                output_dir = tempdir())
 
 MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.result, Num_of_gene_lists, 
-                            genelist = NULL,pathway = all.pathway, enrichment,method,software,
+                            genelist = NULL, pathway, enrichment,method,software,
                             output_dir = getwd())
   {
   #module2
@@ -664,22 +664,22 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
   #=============================
   ##### Text Mining
   #=============================
-  data(textmtx)
-  new.fmat <- descmat
-  new.mat <- namemat
-  pathways<-c(Hallmark.genesets,Positional.genesets,CGP.genesets,Canonical.genesets,
-              Biocarta.genesets,KEGG.genesets,Reactome.genesets,
-              MIR.genesets,TFT.genesets,CGN.genesets,
-              CM.genesets,GOBP.genesets,GOCC.genesets,
-              GOMF.genesets,Oncogenic.genesets,Immunologic.genesets,
-              PID.genesets,CMAP_up.genesets,CMAP_down.genesets,
-              PPI.genesets,JASPARhuman.genesets,PITA.genesets,
-              miRanda.genesets,TargetScan.genesets,Phenocarta.genesets)
-  pathway<-c(Biocarta.genesets,KEGG.genesets,Reactome.genesets,
-             GOBP.genesets,GOCC.genesets,
-             GOMF.genesets,Phenocarta.genesets)
-  new.fmat<-new.fmat[,which(names(pathways)%in%names(pathway))]
-  new.mat<-new.mat[,which(names(pathways)%in%names(pathway))]
+  data(txtmtx)
+  new.fmat <-  matrix(0,ncol = descmtx$ncol,nrow = descmtx$nrow)
+  new.fmat[descmtx$vector] = 1
+  rownames(new.fmat) = descmtx$rownames
+  colnames(new.fmat) = descmtx$colnames
+  new.fmat<-new.fmat[,which(colnames(new.fmat)%in%names(pathway))]
+  
+  new.mat <-  matrix(0,ncol = namemtx$ncol,nrow = namemtx$nrow)
+  new.mat[namemtx$vector] = 1
+  rownames(new.mat) = namemtx$rownames
+  colnames(new.mat) = namemtx$colnames
+  new.mat<-new.mat[,which(colnames(new.mat)%in%names(pathway))]
+  
+  rowcount = rowSums(new.mat)+rowSums(new.fmat)
+  new.mat <- new.mat[which(rowcount >= 2),]
+  new.fmat <- new.fmat[which(rowcount >= 2),]
   
   alpha <- 0.01
   

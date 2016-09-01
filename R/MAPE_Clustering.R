@@ -9,7 +9,6 @@
 ##' @examples
 ##' data(pathways)
 ##' data(MetaDEresult)
-##' data(MetaDEresult)
 ##' MAPE2.0_result = MAPE2.0(stat='maxP',method = "MAPE", enrichment = "KS", 
 ##'                         size.min=15,size.max=500, MetaDE = TRUE,
 ##'                         meta.p = meta.res.p$meta.analysis$pval,ind.p = ind.res$p)
@@ -21,7 +20,7 @@
 ##'  genelist = MAPE2.0_result$genelist
 ##' }
 ##'
-##' MAPE.Clustering(summary = MAPE2.0_result$summary,Num_Clusters=10,
+##' MAPE.Clustering(summary = MAPE2.0_result$summary,Num_Clusters=5,
 ##'                Num_of_gene_lists = MAPE2.0_result$Num_of_gene_lists,
 ##'                genelist = genelist,kappa.result = MAPE.kappa_result$kappa, 
 ##'                pathway = MAPE2.0_result$pathway, enrichment = MAPE2.0_result$enrichment,
@@ -72,7 +71,9 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
   #load("TargetScan.RData")
   #load("Phenocarta.RData")
   
+  
   # load('GO_gene_set_complete_list.RData')
+  wd = getwd()
   k = Num_Clusters
   d = as.dist(1-kappa.result)
   # results <- results.20
@@ -84,15 +85,16 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
 #    b =cbind(fisher_sum_tmp,fisher_sum_tmp[,3])
 #  }
   
-  dir.create(paste(output_dir,"/Clustering_files",sep=""))
+  dir.create(paste(output_dir,"/Clustering_files","_",Num_Clusters,"_","clusters",sep=""))
+  output_clustering <- paste(output_dir,"/Clustering_files","_",Num_Clusters,"_","clusters",sep="")
   sil <- silhouette(results$clustering, (1-kappa.result), diss=T)
   summary(sil)
-  pdf(paste(output_dir,"/Clustering_files/silhouette_plot.pdf",sep=""))
+  pdf(paste(output_clustering,"/silhouette_plot.pdf",sep=""))
   plot(sil, nmax= 80, cex.names=0.6)
   dev.off()
   length(results$clustering)
   dim(d)
-  pdf(paste(output_dir,"/Clustering_files/silhouette_width.pdf",sep=""))
+  pdf(paste(output_clustering,"/silhouette_width.pdf",sep=""))
   hist(sil[,3],breaks=30)
   dev.off()  
   
@@ -117,12 +119,12 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
                                        colnames(new.kappa.result)%in%names(results2)]
     sil <- silhouette(results2, (1-new.kappa.result), diss=T)
   }
-  pdf(paste(output_dir,"/Clustering_files/new_silhouette_plot.pdf",sep=""))
+  pdf(paste(output_clustering,"/new_silhouette_plot.pdf",sep=""))
   plot(sil, nmax= 80, cex.names=0.6)
   dev.off()
   length(results$clustering)
   dim(d)
-  pdf(paste(output_dir,"/Clustering_files/new_silhouette_width.pdf",sep=""))
+  pdf(paste(output_clustering,"/new_silhouette_width.pdf",sep=""))
   hist(sil[,3],breaks=30)
   dev.off() 
   
@@ -241,7 +243,7 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
   #========================================================================================
   #heatmap for each cluster, based on kappa similarity and put number of overlapped genes
   #========================================================================================
-  dir.create(paste(output_dir,"/Clustering_files/Heatmaps",sep=""))
+  dir.create(paste(output_clustering,"/Heatmaps",sep=""))
   order.list = list()
   #  order.list.all
   last_max <-0
@@ -250,9 +252,9 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
     e = names(which(results2 == i))
     temp_file_name <- output_dir
     if( i!=k){
-      temp_file_name <- paste(output_dir,"/Clustering_files/Heatmaps/Heatmap_each_cluster_kappa_number_overlap_genes_", i, ".pdf", sep = "")
+      temp_file_name <- paste(output_clustering,"/Heatmaps/Heatmap_each_cluster_kappa_number_overlap_genes_", i, ".pdf", sep = "")
     } else{
-      temp_file_name <- paste(output_dir,"/Clustering_files/Heatmaps/Heatmap_each_cluster_kappa_number_overlap_genes_Singleton", ".pdf", sep = "")
+      temp_file_name <- paste(output_clustering,"/Heatmaps/Heatmap_each_cluster_kappa_number_overlap_genes_Singleton", ".pdf", sep = "")
     }
     pdf(temp_file_name ,height = if (length(e)<=40) 7 
         else if (length(e)<=100) 10 
@@ -479,7 +481,7 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
   #  order.list_all = list()
   print(paste("Cluster",sep = ""))
   e = names(results2[order(results2)])
-  pdf(paste(output_dir,"/Heatmap_each_cluster_kappa_number_overlap_genes_all",".pdf", sep = ""),height = if (length(e)<=40) 7 
+  pdf(paste(output_clustering,"/Heatmap_each_cluster_kappa_number_overlap_genes_all",".pdf", sep = ""),height = if (length(e)<=40) 7 
       else if (length(e)<=100) 10 
       else if (length(e)<=150) 12.5
       else if (length(e)<=200) 15
@@ -566,7 +568,7 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
   
   colorbar <- as.character( results2[order(results2)][order.list.all]+1 )  
   
-  pdf(paste(output_dir,"/Heatmap_clusters_all",".pdf",sep=""),
+  pdf(paste(output_clustering,"/Heatmap_clusters_all",".pdf",sep=""),
       height = if (length(e)<=40) 8.5 
       else if (length(e)<=100) 10 
       else if (length(e)<=150) 12.5
@@ -860,9 +862,31 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
   }
   #tm_all[[3]]
   
-  setwd(output_dir)
+  setwd(output_clustering)
   
   topGO.summary = GO.cluster.20
+  if (software == "MAPE"){
+    cat("ID,Term,NumGeneTotalInSet,MAPE_p-value",file="Clustering_Summary.csv",append=T)
+    cat("\n",file="Clustering_Summary.csv",append=T)
+  }
+  else if (software == "CPI"){
+    if (enrichment == "KS"){
+      cat("ID,Term,NumGeneTotalInSet",file="Clustering_Summary.csv",append=T)
+      for (n in 1:Num_of_gene_lists)
+        cat(",Study_p-value_group",n,file="Clustering_Summary.csv",append=T)
+      cat("\n",file="Clustering_Summary.csv",append=T)
+    }
+    else if (enrichment == "Fisher's exact"){
+      cat("ID,Term,NumGeneTotalInSet",file="Clustering_Summary.csv",append=T)
+      for (n in 1:Num_of_gene_lists)
+        cat(",NumDEGeneInSet_group",n,file="Clustering_Summary.csv",append=T)
+      for (n in 1:Num_of_gene_lists)
+        cat(",DEGeneInSet_group",n,file="Clustering_Summary.csv",append=T)
+      cat("\n",file="Clustering_Summary.csv",append=T)
+    }
+  }
+  
+  
   
   if(is.null(dim(tm_filtered[[1]]))==TRUE){
     cat("Cluster 1\n", file = "Clustering_Summary.csv",append=T)
@@ -913,4 +937,5 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
   #  cat("count,", file = "Clustering_Summary.csv",append=T)
   #  write.table(t(tm_filtered[[i]][(order(tm_filtered[[i]][,3])[1:15]),8]), "Clustering_Summary.csv", sep=',',quote=F, append = T, row.names=F,col.names=F)
   write.table(topGO.summary[[i]], "Clustering_Summary.csv", sep=",",quote=T, append = T, row.names=F,col.names=F)
+  setwd(wd)
 }

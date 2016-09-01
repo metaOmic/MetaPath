@@ -605,8 +605,7 @@ MAPE_P_Exact<-function (study, label, censoring.status, DB.matrix, size.min = 15
     qvalue.meta = p.adjust(pvalue.meta,"BH")
   }
   else if (stat == "rth") {
-    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[ceiling(rth.value * 
-                                                                         ncol(pvalue.0.mtx))]))
+    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[rth.value]))
     n = ncol(pvalue.0.mtx)
     pvalue.meta = pbeta(P.0,rth.value,(n - rth.value + 1))
     qvalue.meta = p.adjust(pvalue.meta,"BH")
@@ -709,8 +708,7 @@ MAPE_G_Exact = function (study, label, censoring.status, DB.matrix, size.min = 1
     pvalue.meta = pbeta(P.0,1,n)
   }
   else if (stat == "rth") {
-    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[ceiling(rth.value * 
-                                                                         ncol(pvalue.0.mtx))]))
+    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[rth.value]))
     n = ncol(pvalue.0.mtx)
     pvalue.meta = pbeta(P.0,rth.value,(n - rth.value + 1))
   }
@@ -794,11 +792,9 @@ MAPE_P_gene_KS = function (study, label, censoring.status, DB.matrix, size.min =
     rownames(P.B) = rownames(qvalue.0.mtx)
   }
   else if (stat == "rth") {
-    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[ceiling(rth.value * 
-                                                                         ncol(pvalue.0.mtx))]))
+    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[rth.value]))
     rownames(P.0) = rownames(qvalue.0.mtx)
-    P.B = apply(pvalue.B.array, c(1, 2), function(x) sort(x)[ceiling(rth.value * 
-                                                                       dim(pvalue.B.array)[3])])
+    P.B = apply(pvalue.B.array, c(1, 2), function(x) sort(x)[rth.value])
     rownames(P.B) = rownames(qvalue.0.mtx)
   }
   else if (stat == "Fisher") {
@@ -894,11 +890,9 @@ MAPE_G_gene_KS = function (study, label, censoring.status, DB.matrix, size.min =
     rownames(P.B) = rownames(qvalue.0.mtx)
   }
   else if (stat == "rth") {
-    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[ceiling(rth.value * 
-                                                                         ncol(pvalue.0.mtx))]))
+    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[rth.value]))
     rownames(P.0) = rownames(qvalue.0.mtx)
-    P.B = apply(pvalue.B.array, c(1, 2), function(x) sort(x)[ceiling(rth.value * 
-                                                                       dim(pvalue.B.array)[3])])
+    P.B = apply(pvalue.B.array, c(1, 2), function(x) sort(x)[rth.value])
     rownames(P.B) = rownames(qvalue.0.mtx)
   }
   else if (stat == "Fisher") {
@@ -1002,11 +996,9 @@ MAPE_G_sample_KS = function (study, label, censoring.status = NULL, DB.matrix, s
     rownames(P.B) = rownames(qvalue.0.mtx)
   }
   else if (stat == "rth") {
-    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[ceiling(rth.value * 
-                                                                         ncol(pvalue.0.mtx))]))
+    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[rth.value]))
     rownames(P.0) = rownames(qvalue.0.mtx)
-    P.B = apply(pvalue.B.array, c(1, 2), function(x) sort(x)[ceiling(rth.value * 
-                                                                       dim(pvalue.B.array)[3])])
+    P.B = apply(pvalue.B.array, c(1, 2), function(x) sort(x)[rth.value])
     rownames(P.B) = rownames(qvalue.0.mtx)
   }
   else if (stat == "Fisher") {
@@ -1134,11 +1126,9 @@ MAPE_P_sample_KS <- function (study, label, censoring.status = NULL, DB.matrix, 
     rownames(P.B) = rownames(pvalue.0.mtx)
   }
   else if (stat == "rth") {
-    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[ceiling(rth.value * 
-                                                                         ncol(pvalue.0.mtx))]))
+    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[rth.value]))
     rownames(P.0) = rownames(pvalue.0.mtx)
-    P.B = apply(pvalue.B.array, c(1, 2), function(x) sort(x)[ceiling(rth.value * 
-                                                                       dim(pvalue.B.array)[3])])
+    P.B = apply(pvalue.B.array, c(1, 2), function(x) sort(x)[rth.value])
     rownames(P.B) = rownames(pvalue.0.mtx)
   }
   else if (stat == "Fisher") {
@@ -1544,8 +1534,7 @@ MAPE_P_KS = function (study, label, censoring.status, DB.matrix, size.min = 15,
     qvalue.meta = p.adjust(pvalue.meta,"BH")
   }
   else if (stat == "rth") {
-    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[ceiling(rth.value * 
-                                                                         ncol(pvalue.0.mtx))]))
+    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[rth.value]))
     n = ncol(pvalue.0.mtx)
     pvalue.meta = pbeta(P.0,rth.value,(n - rth.value + 1))
     qvalue.meta = p.adjust(pvalue.meta,"BH")
@@ -1649,8 +1638,7 @@ MAPE_G_KS = function (study, label, censoring.status, DB.matrix, size.min = 15,
     pvalue.meta = pbeta(P.0,1,n)
   }
   else if (stat == "rth") {
-    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[ceiling(rth.value * 
-                                                                         ncol(pvalue.0.mtx))]))
+    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[rth.value]))
     n = ncol(pvalue.0.mtx)
     pvalue.meta = pbeta(P.0,rth.value,(n - rth.value + 1))
   }
@@ -1734,8 +1722,7 @@ MAPE_P_KS_DE = function (ind.p = ind.p, DB.matrix, size.min = 15, gene.common,
     qvalue.meta = p.adjust(pvalue.meta,"BH")
   }
   else if (stat == "rth") {
-    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[ceiling(rth.value * 
-                                                                         ncol(pvalue.0.mtx))]))
+    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[rth.value]))
     n = ncol(pvalue.0.mtx)
     pvalue.meta = pbeta(P.0,rth.value,(n - rth.value + 1))
     qvalue.meta = p.adjust(pvalue.meta,"BH")
@@ -1891,8 +1878,7 @@ MAPE_P_Exact_DE = function (ind.p = ind.p, DB.matrix, size.min = 15, gene.common
     qvalue.meta = p.adjust(pvalue.meta,"BH")
   }
   else if (stat == "rth") {
-    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[ceiling(rth.value * 
-                                                                         ncol(pvalue.0.mtx))]))
+    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[rth.value]))
     n = ncol(pvalue.0.mtx)
     pvalue.meta = pbeta(P.0,rth.value,(n - rth.value + 1))
     qvalue.meta = p.adjust(pvalue.meta,"BH")

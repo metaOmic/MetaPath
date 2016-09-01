@@ -21,7 +21,6 @@ cluster results with text mining anotation.
 \examples{
 data(pathways)
 data(MetaDEresult)
-data(MetaDEresult)
 MAPE2.0_result = MAPE2.0(stat='maxP',method = "MAPE", enrichment = "KS", 
                         size.min=15,size.max=500, MetaDE = TRUE,
                         meta.p = meta.res.p$meta.analysis$pval,ind.p = ind.res$p)
@@ -33,7 +32,7 @@ if (MAPE2.0_result$enrichment == "Fisher's exact" & MAPE2.0_result$method == "CP
  genelist = MAPE2.0_result$genelist
 }
 
-MAPE.Clustering(summary = MAPE2.0_result$summary,Num_Clusters=10,
+MAPE.Clustering(summary = MAPE2.0_result$summary,Num_Clusters=5,
                Num_of_gene_lists = MAPE2.0_result$Num_of_gene_lists,
                genelist = genelist,kappa.result = MAPE.kappa_result$kappa, 
                pathway = MAPE2.0_result$pathway, enrichment = MAPE2.0_result$enrichment,

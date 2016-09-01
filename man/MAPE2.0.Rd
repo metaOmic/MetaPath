@@ -41,7 +41,7 @@ identified from each studies.}
 one of the five values: 'minP','maxP','rth','Fisher','AW Fisher'.For CPI, AW Fisher's method is the only option.}
 
 \item{rth.value}{The value of the rth statistic if the meta-anlaysis statistic is 'rth'.
-For example,rth.value=0.6.}
+For example,rth.value = 2.}
 
 \item{permute}{Whether to use permutation to calculate p-values. By default, it is false.}
 

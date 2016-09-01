@@ -30,7 +30,7 @@
 ##' @param stat The meta-analysis statistic to be used to combine multiple studies. For MAPE, it is
 ##' one of the five values: 'minP','maxP','rth','Fisher','AW Fisher'.For CPI, AW Fisher's method is the only option.
 ##' @param rth.value The value of the rth statistic if the meta-anlaysis statistic is 'rth'.
-##' For example,rth.value=0.6.
+##' For example,rth.value = 2.
 ##' @param permute Whether to use permutation to calculate p-values. By default, it is false.
 ##' @param permutation The options for using sample permutation or gene permutation when performing
 ##' enrichment analysis if permute is true. it is one of the two values: 'gene' and 'sample'. The default

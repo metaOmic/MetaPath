@@ -5,15 +5,15 @@
 \title{Perform the Meta-Analysis for Pathway Enrichment}
 \usage{
 MAPE2.0(arraydata = NULL, clinical.data = NULL, label = NULL,
-  censoring = NULL, pathway = c(Biocarta.genesets, GOBP.genesets,
-  GOCC.genesets, GOMF.genesets, KEGG.genesets, Reactome.genesets),
+  pathway = c(Biocarta.genesets, GOBP.genesets, GOCC.genesets, GOMF.genesets,
+  KEGG.genesets, Reactome.genesets), data.type = c("continuous", "discrete"),
+  covariate = NULL, ref.level, ind.method, select.group,
   resp.type = c("twoclass", "multiclass", "continuous", "survival"),
   method = c("CPI", "MAPE"), enrichment = c("KS", "Fisher's exact"),
   DEgene.number = 200, stat = c("Fisher", "maxP", "minP", "rth",
-  "AW Fisher"), rth.value = NULL, permute = F, permutation = c("sample",
-  "gene"), nperm = 500, size.min = 15, size.max = 500,
-  qvalue.cal = c("estimate", "permutation"), MetaDE = F, meta.p = NULL,
-  ind.p = NULL)
+  "AW Fisher"), rth.value = NULL, permute = F, nperm = 500,
+  size.min = 15, size.max = 500, qvalue.cal = c("estimate",
+  "permutation"))
 }
 \arguments{
 \item{arraydata}{The arraydata is a list of microarray data sets. Each microarray data set can be
@@ -24,7 +24,13 @@ for censored. 4)geneid 5)samplename If the microarray data set is in an Expressi
 format, the users need to 1) store the phenotype of interests in the slot
 'label'. 2) store the censor data is the slot 'censoring.status' if applicable}
 
+\item{clinical.data}{Clinical data files}
+
+\item{label}{Label selected from clinical.data}
+
 \item{pathway}{The pathway databases}
+
+\item{data.type}{It is one of the two values: 'continuous','discrete'.}
 
 \item{resp.type}{The phenotype of interest.It is one of the four values: 'twoclass','multiclass',
 'continuous','survival'.}
@@ -45,10 +51,6 @@ For example,rth.value = 2.}
 
 \item{permute}{Whether to use permutation to calculate p-values. By default, it is false.}
 
-\item{permutation}{The options for using sample permutation or gene permutation when performing
-enrichment analysis if permute is true. it is one of the two values: 'gene' and 'sample'. The default
-option is sample permutation.}
-
 \item{nperm}{Number of permutations to be performed.}
 
 \item{size.min}{The minimum size of pathways to be considered. The default value is 15.}
@@ -56,8 +58,6 @@ option is sample permutation.}
 \item{qvalue.cal}{The method to calculate the q-values if permute is true. The default method is to 
 calcuate the q-values based on the permutation method. If qvalue.cal='estimate', the q-values
 were estimated based on the Storey's method.}
-
-\item{MetaDE}{Whether to use MetaDE's result to do pathway analysis. By default, it is false.}
 
 \item{size}{max The maximum size of pathways to be considered. The default value is 500.}
 }
@@ -84,16 +84,22 @@ should be used.
 data(clinical)
 data(Leukemia_v2)
 data(pathways)
-MAPE2.0_result = MAPE2.0(arraydata = Leukemia,clinical.data = clinical,label = "label",
-                        resp.type="multiclass",stat='maxP',method = "CPI", enrichment = "Fisher's exact", 
-                        DEgene.number = 400,size.min=15,size.max=500)
+select.group <- c('inv(16)','t(15;17)')
+ref.level <- "inv(16)"
+data.type <- "continuous"
+ind.method <- c('limma','limma','limma')
+resp.type <- "twoclass"
+MAPE2.0_result_CPI = MAPE2.0(arraydata = Leukemia,clinical.data = clinical,label = "label",
+                        resp.type=resp.type,stat='maxP',method = "CPI", enrichment = "Fisher's exact", 
+                        DEgene.number = 400,size.min=15,size.max=500,data.type=data.type,
+                        ind.method=ind.method,ref.level=ref.level,select.group=select.group)
 
-data(MetaDEresult)
-MAPE2.0_result = MAPE2.0(stat='maxP',method = "MAPE", enrichment = "KS", 
-                        size.min=15,size.max=500, MetaDE = TRUE,
-                        meta.p = meta.res.p$meta.analysis$pval,ind.p = ind.res$p)
+MAPE2.0_result_MAPE = MAPE2.0(arraydata = Leukemia,clinical.data = clinical,label = "label",
+                        resp.type=resp.type,stat='minP',method = "MAPE", enrichment = "KS", 
+                        DEgene.number = 400,size.min=15,size.max=500,data.type=data.type,
+                        ind.method=ind.method,ref.level=ref.level,select.group=select.group)
 }
 \author{
-Zhou Fang, Kui Shen, Xiangrui Zeng and George Tseng.
+Kui Shen, Xiangrui Zeng and George Tseng.
 }
 

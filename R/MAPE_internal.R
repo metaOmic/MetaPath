@@ -1155,10 +1155,10 @@ MAPE_P_sample_KS <- function (study, label, censoring.status = NULL, DB.matrix, 
 
 
 ######################
-MAPE_I_KS <- function (MAP_GENE.obj, MAP_SET.obj, study) 
+MAPE_I_KS <- function (MAP_GENE.obj, MAP_SET.obj) 
 {
-  set.common = intersect(rownames(MAP_GENE.obj$qvalue.meta), 
-                         rownames(MAP_SET.obj$qvalue.meta))
+  set.common = intersect(rownames(MAP_GENE.obj$pvalue.meta), 
+                         rownames(MAP_SET.obj$pvalue.meta))
   nperm = ncol(MAP_SET.obj$pvalue.meta.B)
   pvalue.set.B.array = array(data = NA, dim = c(length(set.common), 
                                                 nperm, 2))
@@ -1180,7 +1180,7 @@ MAPE_I_KS <- function (MAP_GENE.obj, MAP_SET.obj, study)
 
 
 ########################
-MAPE_I <- function (MAP_GENE.obj, MAP_SET.obj, study) 
+MAPE_I <- function (MAP_GENE.obj, MAP_SET.obj) 
 {
   set.common = intersect(rownames(MAP_GENE.obj$qvalue.meta), 
                          rownames(MAP_SET.obj$qvalue.meta))
@@ -1748,33 +1748,6 @@ MAPE_P_KS_DE = function (ind.p = ind.p, DB.matrix, size.min = 15, gene.common,
               qvalue.set.study = qvalue.0.mtx, pvalue.set.study = pvalue.0.mtx))
 }
 
-########################
-MAPE_G_KS_DE = function (meta.p = meta.p,DB.matrix,gene.common,
-                         size.min = 15, size.max = 500) 
-{
-  gene.name.sort = names(sort(meta.p[,1],decreasing = F))
-  gene.name.sort = gene.name.sort[gene.name.sort%in%gene.common]
-  gene.name.sort = toupper(gene.name.sort)
-  set2allgenes.mtx = DB.matrix
-  order.mtx.1 = (set2allgenes.mtx[, gene.name.sort])
-  order.mtx.0 = (1 - order.mtx.1)
-  n_hit = rowSums(order.mtx.1)
-  n_miss = rowSums(order.mtx.0)
-  n_genes = ncol(order.mtx.1)
-  nn = (n_hit*n_miss)/n_genes
-  order.mtx.1 = t(apply(order.mtx.1, 1, function(x) x/sum(x)))
-  order.mtx.0 = -t(apply(order.mtx.0, 1, function(x) x/sum(x)))
-  order.mtx = order.mtx.0 + order.mtx.1
-  ES.0 = as.matrix(apply(t(apply(order.mtx, 1, cumsum)), 1, 
-                         max))
-  pvalue.0 = matrix(exp(-2*nn*(ES.0[,1]^2)), ncol = 1)
-  rownames(pvalue.0) = rownames(ES.0)
-  pvalue.set.0 = pvalue.0 
-  qvalue.set.0 = as.matrix(p.adjust(pvalue.0,"BH"),ncol = 1)
-  rownames(qvalue.set.0) = rownames(pvalue.0)
-  return(list(pvalue.meta = pvalue.set.0, qvalue.meta = qvalue.set.0))
-}
-
 
 ####################
 CPI_KS <- function (study, label, censoring.status, DB.matrix, size.min = 15, 
@@ -1825,6 +1798,7 @@ MAPE_P_Exact_DE = function (ind.p = ind.p, DB.matrix, size.min = 15, gene.common
 {
   out = list()
   out2 = list()
+  out3 = list()
   for (t1 in 1:ncol(ind.p)) {
     genes.in.study = names(ind.p[,t1])
     gene.name.sort = names(sort(ind.p[,t1],decreasing = F))
@@ -1853,6 +1827,7 @@ MAPE_P_Exact_DE = function (ind.p = ind.p, DB.matrix, size.min = 15, gene.common
     out[[t1]] = pvalue.0 
     out2[[t1]] = as.matrix(p.adjust(pvalue.0,"BH"),ncol = 1)
     rownames(out2[[t1]]) = rownames(pvalue.0)
+    out3[[t1]] = DEgene
   }
   set.common = rownames(out[[1]])
   pvalue.0.mtx = matrix(NA, length(set.common), ncol(ind.p))
@@ -1900,15 +1875,142 @@ MAPE_P_Exact_DE = function (ind.p = ind.p, DB.matrix, size.min = 15, gene.common
   }
   qvalue.meta = matrix(qvalue.meta,ncol = 1)
   rownames(qvalue.meta) = rownames(pvalue.meta)
+  genelist = list()
+  for (t1 in 1:ncol(ind.p)) {
+    genelist[[t1]] = out3[[t1]]
+  }
   return(list(pvalue.meta = pvalue.meta, qvalue.meta = qvalue.meta, 
-              qvalue.set.study = qvalue.0.mtx, pvalue.set.study = pvalue.0.mtx))
+              qvalue.set.study = qvalue.0.mtx, pvalue.set.study = pvalue.0.mtx,genelist = genelist))
 }
 
-########################
-MAPE_G_Exact_DE = function (meta.p = meta.p,DB.matrix,gene.common,
-                         size.min = 15, size.max = 500,DEgene.number) 
+
+
+##########################
+MAPE_P_KS_gene = function (ind.p = ind.p, DB.matrix, size.min = 15, gene.common,
+                         size.max = 500, stat = NULL, rth.value = NULL,nperm = nperm) 
 {
-  gene.name.sort = names(sort(meta.p[,1],decreasing = F))
+  out = list()
+  for (t1 in 1:ncol(ind.p)) {
+    gene.name.sort = names(sort(ind.p[,t1],decreasing = F))
+    gene.name.sort = gene.name.sort[gene.name.sort%in%gene.common]
+    gene.name.sort = toupper(gene.name.sort)
+    set2allgenes.mtx = DB.matrix
+    order.mtx.1 = (set2allgenes.mtx[, gene.name.sort])
+    order.mtx.0 = (1 - order.mtx.1)
+    order.mtx.1 = t(apply(order.mtx.1, 1, function(x) x/sum(x)))
+    order.mtx.0 = -t(apply(order.mtx.0, 1, function(x) x/sum(x)))
+    order.mtx = order.mtx.0 + order.mtx.1
+    ES.0 = as.matrix(apply(t(apply(order.mtx, 1, cumsum)), 1, 
+                           max))
+    ES.B = matrix(NA, nrow(ES.0), nperm)
+    for (i in 1:nperm) {
+      if (nrow(order.mtx) > 1) {
+        order.mtx.perm = order.mtx[, sample(ncol(order.mtx))]
+      }
+      else {
+        order.mtx.perm = t(as.matrix(order.mtx[, sample(ncol(order.mtx))]))
+      }
+      order.cumsum = t(apply(order.mtx.perm, 1, cumsum))
+      ES.B[, i] = apply(order.cumsum, 1, max)
+    }
+    rownames(ES.B) = rownames(order.mtx)
+    N.X = apply(set2allgenes.mtx, 1, sum)
+    N.Y = ncol(set2allgenes.mtx) - N.X
+    N = N.X * N.Y/(N.X + N.Y)
+    enrich.out = pqvalues.compute(ES.0, ES.B, Stat.type = "Tstat")
+    out[[t1]] = list()
+    out[[t1]]$pvalue.set.0 = enrich.out$pvalue.0
+    out[[t1]]$pvalue.set.B = enrich.out$pvalue.B
+    out[[t1]]$qvalue.set.0 = enrich.out$qvalue.0
+  }
+  set.common = rownames(out[[1]]$pvalue.set.0)
+  for (t1 in 2:ncol(ind.p)) {
+    set.common = intersect(set.common, rownames(out[[t1]]$pvalue.set.0))
+  }
+  pvalue.B.array = array(data = NA, dim = c(length(set.common), 
+                                            nperm, ncol(ind.p)))
+  dimnames(pvalue.B.array) = list(set.common, paste("perm", 
+                                                    1:nperm, sep = ""), colnames(ncol(ind.p)))
+  pvalue.0.mtx = matrix(NA, length(set.common), ncol(ind.p))
+  qvalue.0.mtx = matrix(NA, length(set.common), ncol(ind.p))
+  for (t1 in 1:ncol(ind.p)) {
+    pvalue.B.array[, , t1] = out[[t1]]$pvalue.set.B[set.common,]
+    pvalue.0.mtx[, t1] = out[[t1]]$pvalue.set.0[set.common, ]
+    qvalue.0.mtx[, t1] = out[[t1]]$qvalue.set.0[set.common,]
+  }
+  rownames(qvalue.0.mtx) = set.common
+  rownames(pvalue.0.mtx) = set.common
+  rm(out)
+  if (stat == "maxP") {
+    P.0 = as.matrix(apply(pvalue.0.mtx, 1, max))
+    rownames(P.0) = rownames(qvalue.0.mtx)
+    P.B = apply(pvalue.B.array, c(1, 2), max)
+    rownames(P.B) = rownames(qvalue.0.mtx)
+  }
+  else if (stat == "minP") {
+    P.0 = as.matrix(apply(pvalue.0.mtx, 1, min))
+    rownames(P.0) = rownames(qvalue.0.mtx)
+    P.B = apply(pvalue.B.array, c(1, 2), min)
+    rownames(P.B) = rownames(qvalue.0.mtx)
+  }
+  else if (stat == "rth") {
+    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) sort(x)[rth.value]))
+    rownames(P.0) = rownames(qvalue.0.mtx)
+    P.B = apply(pvalue.B.array, c(1, 2), function(x) sort(x)[rth.value])
+    rownames(P.B) = rownames(qvalue.0.mtx)
+  }
+  else if (stat == "Fisher") {
+    DF = 2 * ncol(ind.p)
+    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) pchisq(-2 * 
+                                                                sum(log(x)), DF, lower.tail = T)))
+    rownames(P.0) = rownames(qvalue.0.mtx)
+    P.B = apply(pvalue.B.array, c(1, 2), function(x) pchisq(-2 * 
+                                                              sum(log(x)), DF, lower.tail = T))
+    rownames(P.B) = rownames(qvalue.0.mtx)
+  }
+  else {
+    stop("Please check: the selection of stat should be one of the following options: maxP,minP,rth and Fisher")
+  }
+  meta.out = pqvalues.compute(P.0, P.B, Stat.type = "Pvalue")
+  return(list(pvalue.meta = meta.out$pvalue.0, qvalue.meta = meta.out$qvalue.0, 
+              pvalue.meta.B = meta.out$pvalue.B, qvalue.set.study = qvalue.0.mtx, 
+              pvalue.set.study = pvalue.0.mtx))
+ }
+
+
+########################
+MAPE_G_Exact_DE = function (ind.p = ind.p,DB.matrix,gene.common,stat = NULL, rth.value = NULL,
+                            size.min = 15, size.max = 500,DEgene.number) 
+{
+  if (stat == "maxP") {
+    P.0 = as.matrix(apply(ind.p, 1, max))
+    n = ncol(ind.p)
+    pvalue.meta = pbeta(P.0,n,1)
+  }
+  else if (stat == "minP") {
+    P.0 = as.matrix(apply(ind.p, 1, min))
+    n = ncol(ind.p)
+    pvalue.meta = pbeta(P.0,1,n)
+  }
+  else if (stat == "rth") {
+    P.0 = as.matrix(apply(ind.p, 1, function(x) sort(x)[rth.value]))
+    n = ncol(ind.p)
+    pvalue.meta = pbeta(P.0,rth.value,(n - rth.value + 1))
+  }
+  else if (stat == "Fisher") {
+    DF = 2 * ncol(ind.p)
+    P.0 = as.matrix(apply(ind.p, 1, function(x) (-2 * sum(log(x)))))
+    n = ncol(ind.p)
+    pvalue.meta = pchisq(P.0,DF,lower.tail = F)
+  }
+  else if (stat == "AW Fisher") {
+    pvalue.meta = matrix(aw.fisher.pvalue(ind.p, method="original", weight.matrix=T)$pvalues,ncol = 1)
+    rownames(pvalue.meta) = rownames(ind.p)
+  }
+  else {
+    stop("Please check: the selection of stat should be one of the following options: maxP,minP,rth and Fisher")
+  }
+  gene.name.sort = names(sort(pvalue.meta[,1],decreasing = F))
   genes.in.study = gene.name.sort
   gene.name.sort = gene.name.sort[gene.name.sort%in%gene.common]
   gene.name.sort = toupper(gene.name.sort)
@@ -1929,9 +2031,131 @@ MAPE_G_Exact_DE = function (meta.p = meta.p,DB.matrix,gene.common,
     if(length(count_table)==4){
       pvalue.0[i,1] <- fisher.test(count_table, alternative="greater")$p}
   }
-#  pvalue.0 = pvalue.0[pvalue.0[,1]!=1,,drop=FALSE]
+  #  pvalue.0 = pvalue.0[pvalue.0[,1]!=1,,drop=FALSE]
   qvalue.0 = matrix(p.adjust(pvalue.0[,1], "BH"),ncol = 1)
   rownames(qvalue.0) = rownames(pvalue.0)
+  pvalue.set.0 = pvalue.0 
+  qvalue.set.0 = as.matrix(p.adjust(pvalue.0,"BH"),ncol = 1)
+  rownames(qvalue.set.0) = rownames(pvalue.0)
+  return(list(pvalue.meta = pvalue.set.0, qvalue.meta = qvalue.set.0))
+}
+
+
+
+#########################
+MAPE_G_KS_gene = function (ind.p=ind.p,DB.matrix,gene.common,stat,rth.value,
+                         size.min = 15, size.max = 500,nperm) 
+{
+  if (stat == "maxP") {
+    P.0 = as.matrix(apply(ind.p, 1, max))
+    n = ncol(ind.p)
+    pvalue.meta = pbeta(P.0,n,1)
+  }
+  else if (stat == "minP") {
+    P.0 = as.matrix(apply(ind.p, 1, min))
+    n = ncol(ind.p)
+    pvalue.meta = pbeta(P.0,1,n)
+  }
+  else if (stat == "rth") {
+    P.0 = as.matrix(apply(ind.p, 1, function(x) sort(x)[rth.value]))
+    n = ncol(ind.p)
+    pvalue.meta = pbeta(P.0,rth.value,(n - rth.value + 1))
+  }
+  else if (stat == "Fisher") {
+    DF = 2 * ncol(ind.p)
+    P.0 = as.matrix(apply(ind.p, 1, function(x) (-2 * sum(log(x)))))
+    n = ncol(ind.p)
+    pvalue.meta = pchisq(P.0,DF,lower.tail = F)
+  }
+  else if (stat == "AW Fisher") {
+    pvalue.meta = matrix(aw.fisher.pvalue(ind.p, method="original", weight.matrix=T)$pvalues,ncol = 1)
+    rownames(pvalue.meta) = rownames(ind.p)
+  }
+  else {
+    stop("Please check: the selection of stat should be one of the following options: maxP,minP,rth and Fisher")
+  }
+  gene.name.sort = names(sort(pvalue.meta[,1],decreasing = F))
+  gene.name.sort = gene.name.sort[gene.name.sort%in%gene.common]
+  gene.name.sort = toupper(gene.name.sort)
+  set2allgenes.mtx = DB.matrix
+  order.mtx.1 = (set2allgenes.mtx[, gene.name.sort])
+  order.mtx.0 = (1 - order.mtx.1)
+  order.mtx.1 = t(apply(order.mtx.1, 1, function(x) x/sum(x)))
+  order.mtx.0 = -t(apply(order.mtx.0, 1, function(x) x/sum(x)))
+  order.mtx = order.mtx.0 + order.mtx.1
+  ES.0 = as.matrix(apply(t(apply(order.mtx, 1, cumsum)), 1, 
+                         max))
+  ES.B = matrix(NA, nrow(ES.0), nperm)
+  for (t1 in 1:nperm) {
+    if (nrow(order.mtx) > 1) {
+      order.mtx.perm = order.mtx[, sample(ncol(order.mtx))]
+    }
+    else {
+      order.mtx.perm = t(as.matrix(order.mtx[, sample(ncol(order.mtx))]))
+    }
+    order.cumsum = t(apply(order.mtx.perm, 1, cumsum))
+    ES.B[, t1] = apply(order.cumsum, 1, max)
+  }
+  rownames(ES.B) = rownames(order.mtx)
+  N.X = apply(set2allgenes.mtx, 1, sum)
+  N.Y = ncol(set2allgenes.mtx) - N.X
+  N = N.X * N.Y/(N.X + N.Y)
+  enrich.out = pqvalues.compute(ES.0, ES.B, Stat.type = "Tstat")
+  return(list(pvalue.meta = enrich.out$pvalue.0, pvalue.meta.B = enrich.out$pvalue.B, 
+              qvalue.meta = enrich.out$qvalue.0))
+}
+
+
+
+#########################
+MAPE_G_KS_DE = function (ind.p=ind.p,DB.matrix,gene.common,stat,rth.value,
+                           size.min = 15, size.max = 500) 
+{
+  if (stat == "maxP") {
+    P.0 = as.matrix(apply(ind.p, 1, max))
+    n = ncol(ind.p)
+    pvalue.meta = pbeta(P.0,n,1)
+  }
+  else if (stat == "minP") {
+    P.0 = as.matrix(apply(ind.p, 1, min))
+    n = ncol(ind.p)
+    pvalue.meta = pbeta(P.0,1,n)
+  }
+  else if (stat == "rth") {
+    P.0 = as.matrix(apply(ind.p, 1, function(x) sort(x)[rth.value]))
+    n = ncol(ind.p)
+    pvalue.meta = pbeta(P.0,rth.value,(n - rth.value + 1))
+  }
+  else if (stat == "Fisher") {
+    DF = 2 * ncol(ind.p)
+    P.0 = as.matrix(apply(ind.p, 1, function(x) (-2 * sum(log(x)))))
+    n = ncol(ind.p)
+    pvalue.meta = pchisq(P.0,DF,lower.tail = F)
+  }
+  else if (stat == "AW Fisher") {
+    pvalue.meta = matrix(aw.fisher.pvalue(ind.p, method="original", weight.matrix=T)$pvalues,ncol = 1)
+    rownames(pvalue.meta) = rownames(ind.p)
+  }
+  else {
+    stop("Please check: the selection of stat should be one of the following options: maxP,minP,rth and Fisher")
+  }
+  gene.name.sort = names(sort(pvalue.meta[,1],decreasing = F))
+  gene.name.sort = gene.name.sort[gene.name.sort%in%gene.common]
+  gene.name.sort = toupper(gene.name.sort)
+  set2allgenes.mtx = DB.matrix
+  order.mtx.1 = (set2allgenes.mtx[, gene.name.sort])
+  order.mtx.0 = (1 - order.mtx.1)
+  n_hit = rowSums(order.mtx.1)
+  n_miss = rowSums(order.mtx.0)
+  n_genes = ncol(order.mtx.1)
+  nn = (n_hit*n_miss)/n_genes
+  order.mtx.1 = t(apply(order.mtx.1, 1, function(x) x/sum(x)))
+  order.mtx.0 = -t(apply(order.mtx.0, 1, function(x) x/sum(x)))
+  order.mtx = order.mtx.0 + order.mtx.1
+  ES.0 = as.matrix(apply(t(apply(order.mtx, 1, cumsum)), 1, 
+                         max))
+  pvalue.0 = matrix(exp(-2*nn*(ES.0[,1]^2)), ncol = 1)
+  rownames(pvalue.0) = rownames(ES.0)
   pvalue.set.0 = pvalue.0 
   qvalue.set.0 = as.matrix(p.adjust(pvalue.0,"BH"),ncol = 1)
   rownames(qvalue.set.0) = rownames(pvalue.0)

@@ -70,7 +70,7 @@ MAPE2.0<-function (arraydata = NULL, clinical.data = NULL, label = NULL,
                    pathway = c(Biocarta.genesets,GOBP.genesets,GOCC.genesets,GOMF.genesets,
                                KEGG.genesets,Reactome.genesets), 
                     data.type = c("continuous", "discrete"), covariate = NULL,
-                    ref.level, ind.method, select.group,
+                    ref.level, ind.method, select.group,tail="abs",
                     resp.type = c("twoclass", "multiclass", "continuous", "survival"),
                     method = c("CPI","MAPE"), enrichment = c("KS","Fisher's exact"), DEgene.number = 200,
                     stat = c("Fisher","maxP", "minP", "rth","AW Fisher"), rth.value = NULL, permute = F, 
@@ -79,7 +79,7 @@ MAPE2.0<-function (arraydata = NULL, clinical.data = NULL, label = NULL,
 { 
   ind.res <- Indi.DE.Analysis (data = arraydata,clin.data= clinical.data, 
                            data.type=data.type,resp.type = resp.type,
-                           response = label ,covariate = covariate,
+                           response = label ,covariate = covariate,tail = tail,
                            ind.method=ind.method,select.group = select.group,
                            ref.level=ref.level)
   ind.p = ind.res$p

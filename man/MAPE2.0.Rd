@@ -5,15 +5,15 @@
 \title{Perform the Meta-Analysis for Pathway Enrichment}
 \usage{
 MAPE2.0(arraydata = NULL, clinical.data = NULL, label = NULL,
-  pathway = c(Biocarta.genesets, GOBP.genesets, GOCC.genesets, GOMF.genesets,
-  KEGG.genesets, Reactome.genesets), data.type = c("continuous", "discrete"),
-  covariate = NULL, ref.level, ind.method, select.group,
-  resp.type = c("twoclass", "multiclass", "continuous", "survival"),
-  method = c("CPI", "MAPE"), enrichment = c("KS", "Fisher's exact"),
-  DEgene.number = 200, stat = c("Fisher", "maxP", "minP", "rth",
-  "AW Fisher"), rth.value = NULL, permute = F, nperm = 500,
-  size.min = 15, size.max = 500, qvalue.cal = c("estimate",
-  "permutation"))
+  pmtx = NULL, pathway = c(Biocarta.genesets, GOBP.genesets, GOCC.genesets,
+  GOMF.genesets, KEGG.genesets, Reactome.genesets),
+  data.type = c("continuous", "discrete"), covariate = NULL, ref.level,
+  ind.method, select.group, tail = "abs", resp.type = c("twoclass",
+  "multiclass", "continuous", "survival"), method = c("CPI", "MAPE"),
+  enrichment = c("KS", "Fisher's exact"), DEgene.number = 200,
+  stat = c("Fisher", "maxP", "minP", "rth", "AW Fisher"), rth.value = NULL,
+  permute = F, nperm = 500, size.min = 15, size.max = 500,
+  qvalue.cal = c("estimate", "permutation"))
 }
 \arguments{
 \item{arraydata}{The arraydata is a list of microarray data sets. Each microarray data set can be
@@ -27,6 +27,8 @@ format, the users need to 1) store the phenotype of interests in the slot
 \item{clinical.data}{Clinical data files}
 
 \item{label}{Label selected from clinical.data}
+
+\item{pmtx}{Option for uploading p-value matrix.}
 
 \item{pathway}{The pathway databases}
 

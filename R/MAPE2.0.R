@@ -41,6 +41,7 @@
 ##' @param clinical.data Clinical data files
 ##' @param label Label selected from clinical.data
 ##' @param data.type It is one of the two values: 'continuous','discrete'.
+##' @param pmtx Option for uploading p-value matrix.
 ##' @return The qvalue and pvalue of each pathway including Meta qvalue and Meta pvalue.
 ##' @author Kui Shen, Xiangrui Zeng and George Tseng.
 ##' @export
@@ -66,7 +67,7 @@
 
 
 
-MAPE2.0<-function (arraydata = NULL, clinical.data = NULL, label = NULL,
+MAPE2.0<-function (arraydata = NULL, clinical.data = NULL, label = NULL,pmtx = NULL,
                    pathway = c(Biocarta.genesets,GOBP.genesets,GOCC.genesets,GOMF.genesets,
                                KEGG.genesets,Reactome.genesets), 
                     data.type = c("continuous", "discrete"), covariate = NULL,
@@ -77,6 +78,7 @@ MAPE2.0<-function (arraydata = NULL, clinical.data = NULL, label = NULL,
                     nperm = 500, size.min = 15, size.max = 500, 
                     qvalue.cal = c("estimate","permutation"))
 { 
+  if(is.null(pmtx)){
   ind.res <- Indi.DE.Analysis (data = arraydata,clin.data= clinical.data, 
                            data.type=data.type,resp.type = resp.type,
                            response = label ,covariate = covariate,tail = tail,
@@ -84,6 +86,11 @@ MAPE2.0<-function (arraydata = NULL, clinical.data = NULL, label = NULL,
                            ref.level=ref.level)
   ind.p = ind.res$p
   rm(arraydata)
+  }
+  else {
+    ind.p = pmtx
+  }
+  
   
   if (method == "CPI") {
     enrichment = match.arg(enrichment)

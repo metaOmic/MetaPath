@@ -19,24 +19,26 @@ This is the third major function in the MetaPath2.0 package which outputs the pa
 cluster results with text mining anotation.
 }
 \examples{
+data(clinical)
+data(Leukemia_v2)
 data(pathways)
-data(MetaDEresult)
-MAPE2.0_result = MAPE2.0(stat='maxP',method = "MAPE", enrichment = "KS", 
-                        size.min=15,size.max=500, MetaDE = TRUE,
-                        meta.p = meta.res.p$meta.analysis$pval,ind.p = ind.res$p)
+select.group <- c('inv(16)','t(15;17)')
+ref.level <- "inv(16)"
+data.type <- "continuous"
+ind.method <- c('limma','limma','limma')
+resp.type <- "twoclass"
+MAPE2.0_result_CPI = MAPE2.0(arraydata = Leukemia,clinical.data = clinical,label = "label",
+                        resp.type=resp.type,stat='maxP',method = "CPI", enrichment = "Fisher's exact", 
+                        DEgene.number = 400,size.min=15,size.max=500,data.type=data.type,
+                        ind.method=ind.method,ref.level=ref.level,select.group=select.group)
 MAPE.kappa_result = MAPE.Kappa(summary = MAPE2.0_result$summary, software = MAPE2.0_result$method,
-                              pathway = MAPE2.0_result$pathway, max_k = 20, q_cutoff = 0.05,
-                              output_dir = tempdir())
-genelist = NULL
-if (MAPE2.0_result$enrichment == "Fisher's exact" & MAPE2.0_result$method == "CPI"){
- genelist = MAPE2.0_result$genelist
-}
-
+                               pathway = MAPE2.0_result$pathway, max_k = 20, q_cutoff = 0.0005,
+                               output_dir = tempdir())
 MAPE.Clustering(summary = MAPE2.0_result$summary,Num_Clusters=5,
                Num_of_gene_lists = MAPE2.0_result$Num_of_gene_lists,
                genelist = genelist,kappa.result = MAPE.kappa_result$kappa, 
                pathway = MAPE2.0_result$pathway, enrichment = MAPE2.0_result$enrichment,
                method = MAPE.kappa_result$method,software = MAPE2.0_result$method,
-               output_dir = tempdir())
+               output_dir = getwd())
 }
 

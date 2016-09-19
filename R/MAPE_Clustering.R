@@ -15,7 +15,7 @@
 ##' data.type <- "continuous"
 ##' ind.method <- c('limma','limma','limma')
 ##' resp.type <- "twoclass"
-##' MAPE2.0_result_CPI = MAPE2.0(arraydata = Leukemia,clinical.data = clinical,label = "label",
+##' MAPE2.0_result = MAPE2.0(arraydata = Leukemia,clinical.data = clinical,label = "label",
 ##'                         resp.type=resp.type,stat='maxP',method = "CPI", enrichment = "Fisher's exact", 
 ##'                         DEgene.number = 400,size.min=15,size.max=500,data.type=data.type,
 ##'                         ind.method=ind.method,ref.level=ref.level,select.group=select.group)
@@ -42,15 +42,6 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
   dir.create(paste(output_dir,"/Clustering_files","_",Num_Clusters,"_","clusters",sep=""))
   output_clustering <- paste(output_dir,"/Clustering_files","_",Num_Clusters,"_","clusters",sep="")
   sil <- silhouette(results$clustering, (1-kappa.result), diss=T)
-  summary(sil)
-  pdf(paste(output_clustering,"/silhouette_plot.pdf",sep=""))
-  plot(sil, nmax= 80, cex.names=0.6)
-  dev.off()
-  length(results$clustering)
-  dim(d)
-  pdf(paste(output_clustering,"/silhouette_width.pdf",sep=""))
-  hist(sil[,3],breaks=30)
-  dev.off()  
   
   k <- k+1
   sil_cut <- 0.1
@@ -73,12 +64,10 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
                                        colnames(new.kappa.result)%in%names(results2)]
     sil <- silhouette(results2, (1-new.kappa.result), diss=T)
   }
-  pdf(paste(output_clustering,"/new_silhouette_plot.pdf",sep=""))
+  pdf(paste(output_clustering,"/silhouette_plot.pdf",sep=""))
   plot(sil, nmax= 80, cex.names=0.6)
   dev.off()
-  length(results$clustering)
-  dim(d)
-  pdf(paste(output_clustering,"/new_silhouette_width.pdf",sep=""))
+  pdf(paste(output_clustering,"/silhouette_width.pdf",sep=""))
   hist(sil[,3],breaks=30)
   dev.off() 
   
@@ -95,13 +84,13 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
     e = names(which(results2 == i))
     indi.heatmap.data[[i]] = as.matrix(b[match(e, rownames(b)), (1:Num_of_gene_lists) + 2])
     rownames(indi.heatmap.data[[i]]) <- e
-    colnames(indi.heatmap.data[[i]]) <- paste("group",1:Num_of_gene_lists,sep="")
+    colnames(indi.heatmap.data[[i]]) <- colnames(summary[,-c(1,2)])
   }
   e = names(results2)
   if (software == "CPI"){indi.heatmap.data_all = as.matrix(b[match(e, rownames(b)), (1:Num_of_gene_lists) + 2])}
   if (software == "MAPE"){indi.heatmap.data_all = as.matrix(b[match(e, rownames(b)), (1:Num_of_gene_lists)])}
   rownames(indi.heatmap.data_all) <- e
-  colnames(indi.heatmap.data_all) <- paste("group",1:Num_of_gene_lists,sep="")
+  colnames(indi.heatmap.data_all) <- colnames(summary[,-c(1,2)])
   
   
   #========================================================================================
@@ -217,9 +206,9 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
               genelist_tmp <- genelist[[n]][which(toupper(genelist[[n]]) %in% toupper(pathway[[e[j]]]))]
               DEGeneInSet[j,n] <- paste(genelist_tmp,collapse="//")
               NumDEGeneInSet[j,n] <- length(genelist_tmp)
-              h = cbind(f, NumGeneTotalInSet,NumDEGeneInSet,DEGeneInSet)
             }
-          }
+          } 
+          h = cbind(f, NumGeneTotalInSet,NumDEGeneInSet,DEGeneInSet)
         }
       }
           rownames(h) <-NULL
@@ -334,10 +323,10 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
                   else if (length(e)<=150) 0.07 + 1/log10(length(e))
                   else if (length(e)<=200) 0.03 + 1/log10(length(e))
                   else 0.01 + 1/log10(length(e)),
-                  cexCol =  if (length(e)<=40) 0.2 + 1/log10(Num_of_gene_lists) 
-                  else if (length(e)<=100) 0.3 + 1/log10(Num_of_gene_lists) 
-                  else if (length(e)<=150) 0.5 + 1/log10(Num_of_gene_lists)
-                  else 0.6 + 1/log10(Num_of_gene_lists),
+                  cexCol =  if (length(e)<=40) 0.2 + 0.6/log10(Num_of_gene_lists) 
+                  else if (length(e)<=100) 0.3 + 0.6/log10(Num_of_gene_lists) 
+                  else if (length(e)<=150) 0.5 + 0.6/log10(Num_of_gene_lists)
+                  else 0.6 + 0.6/log10(Num_of_gene_lists),
                   RowSideColors = colorbar,
                   keysize = if (length(e)<=40) 1.5 
                   else if (length(e)<=100) 1.3 
@@ -346,7 +335,8 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
                   offsetRow = if (length(e)<=40) 0.25 
                   else if (length(e)<=100) 0 
                   else if (length(e)<=150) -0.1
-                  else -0.2)
+                  else -0.2,
+                  )
   }
   dev.off()
   
@@ -377,10 +367,10 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
                   else if (length(e)<=150) 0.07 + 1/log10(length(e))
                   else if (length(e)<=200) 0.03 + 1/log10(length(e))
                   else 0.01 + 1/log10(length(e)),
-                  cexCol =  if (length(e)<=40) 0.2 + 1/log10(Num_of_gene_lists) 
-                  else if (length(e)<=100) 0.3 + 1/log10(Num_of_gene_lists) 
-                  else if (length(e)<=150) 0.5 + 1/log10(Num_of_gene_lists)
-                  else 0.6 + 1/log10(Num_of_gene_lists),
+                  cexCol =  if (length(e)<=40) 0.2 + 0.6/log10(Num_of_gene_lists) 
+                  else if (length(e)<=100) 0.3 + 0.6/log10(Num_of_gene_lists) 
+                  else if (length(e)<=150) 0.5 + 0.6/log10(Num_of_gene_lists)
+                  else 0.6 + 0.6/log10(Num_of_gene_lists),
                   RowSideColors = colorbar,
                   keysize = if (length(e)<=40) 1.5 
                   else if (length(e)<=100) 1.3 
@@ -462,15 +452,15 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
     if (enrichment == "KS"){
       cat("ID,Term,NumGeneTotalInSet",file="Clustering_Summary.csv",append=T)
       for (n in 1:Num_of_gene_lists)
-        cat(",Study_p-value_group",n,file="Clustering_Summary.csv",append=T)
+        cat(",Study_p-value",colnames(summary[,n+2]),file="Clustering_Summary.csv",append=T)
       cat("\n",file="Clustering_Summary.csv",append=T)
     }
     else if (enrichment == "Fisher's exact"){
       cat("ID,Term,NumGeneTotalInSet",file="Clustering_Summary.csv",append=T)
       for (n in 1:Num_of_gene_lists)
-        cat(",NumDEGeneInSet_group",n,file="Clustering_Summary.csv",append=T)
+        cat(",NumDEGeneInSet_",colnames(summary[,n+2]),file="Clustering_Summary.csv",append=T)
       for (n in 1:Num_of_gene_lists)
-        cat(",DEGeneInSet_group",n,file="Clustering_Summary.csv",append=T)
+        cat(",DEGeneInSet_",colnames(summary[,n+2]),file="Clustering_Summary.csv",append=T)
       cat("\n",file="Clustering_Summary.csv",append=T)
     }
   }

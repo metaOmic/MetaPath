@@ -18,7 +18,7 @@
 ##' data.type <- "continuous"
 ##' ind.method <- c('limma','limma','limma')
 ##' resp.type <- "twoclass"
-##' MAPE2.0_result_CPI = MAPE2.0(arraydata = Leukemia,clinical.data = clinical,label = "label",
+##' MAPE2.0_result = MAPE2.0(arraydata = Leukemia,clinical.data = clinical,label = "label",
 ##'                         resp.type=resp.type,stat='maxP',method = "CPI", enrichment = "Fisher's exact", 
 ##'                         DEgene.number = 400,size.min=15,size.max=500,data.type=data.type,
 ##'                         ind.method=ind.method,ref.level=ref.level,select.group=select.group)

@@ -296,7 +296,7 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
   e = names(results2)
   colorbar <- as.character(results2+1 )   
   
-  tiff(paste(output_clustering,"/Heatmap_clusters_all",".tiff",sep=""),
+  png(paste(output_clustering,"/Heatmap_clusters_all",".png",sep=""),
        height = if (length(e)<=40)  600
        else if (length(e)<=100) 700 
        else if (length(e)<=150) 800

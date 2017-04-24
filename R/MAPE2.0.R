@@ -54,15 +54,16 @@
 ##' data.type <- "continuous"
 ##' ind.method <- c('limma','limma','limma')
 ##' resp.type <- "twoclass"
+##' paired <- rep(FALSE,length(Leukemia))
 ##' MAPE2.0_result_CPI = MAPE2.0(arraydata = Leukemia,clinical.data = clinical,label = "label",
 ##'                         resp.type=resp.type,stat='maxP',method = "CPI", enrichment = "Fisher's exact", 
 ##'                         DEgene.number = 400,size.min=15,size.max=500,data.type=data.type,
-##'                         ind.method=ind.method,ref.level=ref.level,select.group=select.group)
+##'                         ind.method=ind.method,ref.level=ref.level,paired=paired,select.group=select.group)
 ##' 
 ##' MAPE2.0_result_MAPE = MAPE2.0(arraydata = Leukemia,clinical.data = clinical,label = "label",
 ##'                         resp.type=resp.type,stat='minP',method = "MAPE", enrichment = "KS", 
 ##'                         DEgene.number = 400,size.min=15,size.max=500,data.type=data.type,
-##'                         ind.method=ind.method,ref.level=ref.level,select.group=select.group)
+##'                         ind.method=ind.method,ref.level=ref.level,paired=paired,select.group=select.group)
 
 
 
@@ -71,7 +72,7 @@ MAPE2.0<-function (arraydata = NULL, clinical.data = NULL, label = NULL,pmtx = N
                    pathway = c(Biocarta.genesets,GOBP.genesets,GOCC.genesets,GOMF.genesets,
                                KEGG.genesets,Reactome.genesets), 
                     data.type = c("continuous", "discrete"), covariate = NULL,
-                    ref.level, ind.method, select.group,tail="abs",
+                    ref.level, paired, ind.method, select.group,tail="abs",
                     resp.type = c("twoclass", "multiclass", "continuous", "survival"),
                     method = c("CPI","MAPE"), enrichment = c("KS","Fisher's exact"), DEgene.number = 200,
                     stat = c("Fisher","maxP", "minP", "rth","AW Fisher"), rth.value = NULL, permute = F, 
@@ -83,7 +84,7 @@ MAPE2.0<-function (arraydata = NULL, clinical.data = NULL, label = NULL,pmtx = N
                            data.type=data.type,resp.type = resp.type,
                            response = label ,covariate = covariate,tail = tail,
                            ind.method=ind.method,select.group = select.group,
-                           ref.level=ref.level)
+                           ref.level=ref.level,paired=paired)
   ind.p = ind.res$p
   rm(arraydata)
   }

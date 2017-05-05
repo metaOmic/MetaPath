@@ -18,7 +18,8 @@
 ##' MAPE2.0_result = MAPE2.0(arraydata = Leukemia,clinical.data = clinical,label = "label",
 ##'                         resp.type=resp.type,stat='maxP',method = "CPI", enrichment = "Fisher's exact", 
 ##'                         DEgene.number = 400,size.min=15,size.max=500,data.type=data.type,
-##'                         ind.method=ind.method,ref.level=ref.level,select.group=select.group)
+##'                         ind.method=ind.method,ref.level=ref.level,select.group=select.group, 
+##'                         paired = paired)
 ##' MAPE.kappa_result = MAPE.Kappa(summary = MAPE2.0_result$summary, software = MAPE2.0_result$method,
 ##'                                pathway = MAPE2.0_result$pathway, max_k = 20, q_cutoff = 0.0005,
 ##'                                output_dir = tempdir())
@@ -315,6 +316,8 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
     a = heatmap.2(-log10(heatmap.pathway.pvalue), col = (c(intpalette(c("#FFFFD5FF", "#FF0000FF"), numcol = 30),rep("#FF0000FF",30))),
                   Rowv = F, Colv = F, density.info="none", trace="none", scale = "none", margins = c(7, 20), 
                   dendrogram = "none",
+                  rowsep = as.numeric(cumsum(table(as.character(results2)))),
+                  sepwidth = c(0.05,0.4),
                   cexRow =  if (length(e)==2) 1.5
                   else if (length(e)==3) 1.48
                   else if (length(e)==4) 1.4
@@ -359,6 +362,8 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
     a = heatmap.2(-log10(heatmap.pathway.pvalue), col = (c(intpalette(c("#FFFFD5FF", "#FF0000FF"), numcol = 30),rep("#FF0000FF",30))),
                   Rowv = F, Colv = F, density.info="none", trace="none", scale = "none", margins = c(7, 20), 
                   dendrogram = "none",
+                  rowsep = as.numeric(cumsum(table(as.character(results2)))),
+                  sepwidth = c(0.05,0.4),
                   cexRow =  if (length(e)==2) 1.5
                   else if (length(e)==3) 1.48
                   else if (length(e)==4) 1.4

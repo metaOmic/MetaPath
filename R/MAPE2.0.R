@@ -83,9 +83,11 @@ MAPE2.0<-function (arraydata = NULL, clinical.data = NULL, label = NULL,pmtx = N
 { 
   if(is.null(pmtx)){
   
-  if(mixed==T) {
-     data.type <- mix.type
-  }	
+   if(!is.null(mixed)){
+    if(mixed==T) {
+    	   data.type <- mix.type
+    }
+   } 
   	
   ind.res <- Indi.DE.Analysis (data = arraydata,clin.data= clinical.data, 
                            data.type=data.type,resp.type = resp.type,

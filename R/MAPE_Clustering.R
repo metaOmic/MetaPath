@@ -89,7 +89,7 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
     colnames(indi.heatmap.data[[i]]) <- colnames(summary[,-c(1,2)])
     }
     if (software == "MAPE"){
-    colnames(indi.heatmap.data[[i]]) <- colnames(summary[,c(1:(ncol(summary)-6)])])
+    colnames(indi.heatmap.data[[i]]) <- colnames(summary[,c(1:(ncol(summary)-6))])
     }
   }
   e = names(results2)
@@ -100,7 +100,7 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
     colnames(indi.heatmap.data_all) <- colnames(summary[,-c(1,2)])
   }
   if (software == "MAPE"){
-    colnames(indi.heatmap.data_all) <- colnames(summary[,c(1:(ncol(summary)-6)])])
+    colnames(indi.heatmap.data_all) <- colnames(summary[,c(1:(ncol(summary)-6))])
   }
   #========================================================================================
   #heatmap for each cluster, based on kappa similarity and put number of overlapped genes

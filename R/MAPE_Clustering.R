@@ -21,7 +21,7 @@
 ##'                         ind.method=ind.method,ref.level=ref.level,select.group=select.group, 
 ##'                         paired = paired)
 ##' MAPE.kappa_result = MAPE.Kappa(summary = MAPE2.0_result$summary, software = MAPE2.0_result$method,
-##'                                pathway = MAPE2.0_result$pathway, max_k = 20, q_cutoff = 0.0005,
+##'                                pathway = MAPE2.0_result$pathway, max_k = 10, q_cutoff = 0.0005,
 ##'                                output_dir = tempdir())
 ##' MAPE.Clustering(summary = MAPE2.0_result$summary,Num_Clusters=5,
 ##'                Num_of_gene_lists = MAPE2.0_result$Num_of_gene_lists,

@@ -25,7 +25,7 @@
 ##'                                output_dir = tempdir())
 ##' MAPE.Clustering(summary = MAPE2.0_result$summary,Num_Clusters=5,
 ##'                Num_of_gene_lists = MAPE2.0_result$Num_of_gene_lists,
-##'                genelist = genelist,kappa.result = MAPE.kappa_result$kappa, 
+##'                genelist = MAPE2.0_result$genelist,kappa.result = MAPE.kappa_result$kappa, 
 ##'                pathway = MAPE2.0_result$pathway, enrichment = MAPE2.0_result$enrichment,
 ##'                method = MAPE.kappa_result$method,software = MAPE2.0_result$method,
 ##'                output_dir = getwd())
@@ -76,6 +76,11 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
   singleton[1:length(singleton)]<- max(results2)+1
   results2<-c(results2,singleton)
   results2 <- results2[order(results2)]
+  if (!all(1:k %in% unique(results$clustering))){
+    stop('Please choose a smaller number of clusters k or 
+          choose a larger FDR cutoff to select more pathways for clustering')
+  }
+  
   
   #================================
   #heatmap for each cluster

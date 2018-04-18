@@ -515,7 +515,7 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
       write.table(t(tm_filtered[[1]][1:15,4]), "Clustering_Summary.csv", sep=',',quote=F, append = T, row.names=F,col.names=F,na="")
       cat("count,", file = "Clustering_Summary.csv",append=T)
       write.table(t(tm_filtered[[1]][1:15,1]), "Clustering_Summary.csv", sep=',',quote=F, append = T, row.names=F,col.names=F,na="")
-      write.table(topGO.summary[[]], "Clustering_Summary.csv", sep=",",quote=T, append = T, row.names=F,col.names=F)
+      write.table(topGO.summary[[1]], "Clustering_Summary.csv", sep=",",quote=T, append = T, row.names=F,col.names=F)
       }  
   }
   for (i in 2:(k-1)){ 

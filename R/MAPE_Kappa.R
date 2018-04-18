@@ -27,7 +27,7 @@
 ##'                                output_dir = tempdir())
 
 
-MAPE.Kappa <- function(summary, max_k = 20, pathway, software =c("CPI","MAPE"),
+MAPE.Kappa <- function(summary, max_k = 10, pathway, software =c("CPI","MAPE"),
                        method = c("MAPE_I","MAPE_G","MAPE_P"),
                        q_cutoff = 0.1,output_dir = getwd())
   {

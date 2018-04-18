@@ -45,6 +45,7 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
   sil <- silhouette(results$clustering, (1-kappa.result), diss=T)
   
   k <- k+1
+  k_org = k
   sil_cut <- 0.1
   results2 <- results$clustering
   new.kappa.result<-kappa.result
@@ -74,6 +75,8 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
 #    stop('Please choose a smaller number of clusters k or choose a larger FDR cutoff to select more pathways for clustering')
 #  }
   k = max(results2)
+  if (k != k_org){warning(paste('Due to empty cluster(s), the cluster number of reduced from',
+                               k_org - 1, 'to', k-1)}
   pdf(paste(output_clustering,"/silhouette_plot.pdf",sep=""))
   plot(sil, nmax= 80, cex.names=0.6)
   dev.off()
@@ -500,7 +503,7 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
   } else {
     cat("Cluster 1\n", file = "Clustering_Summary.csv",append=T)
     cat("Key words,", file = "Clustering_Summary.csv",append=T)
-    write.table(t(rownames(tm_filtered[[1]])[1:15]), "Clustering_Summary.csv", sep=',',quote=F, append = T, row.names=F,col.names=F,na="")
+    write.table(t(as.character(rownames(tm_filtered[[1]])[1:15])), "Clustering_Summary.csv", sep=',',quote=F, append = T, row.names=F,col.names=F,na="")
     cat("q_value,", file = "Clustering_Summary.csv",append=T)
     write.table(t(tm_filtered[[1]][1:15,4]), "Clustering_Summary.csv", sep=',',quote=F, append = T, row.names=F,col.names=F,na="")
     cat("count,", file = "Clustering_Summary.csv",append=T)
@@ -520,7 +523,7 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
     } else {
       cat(paste("\nCluster ", i, "\n", sep = ""), file = "Clustering_Summary.csv", append = T)
       cat("Key words,", file = "Clustering_Summary.csv",append=T)
-      write.table(t(rownames(tm_filtered[[i]])[1:15]), "Clustering_Summary.csv", sep=',',quote=F, append = T, row.names=F,col.names=F,na="")
+      write.table(t(as.character(rownames(tm_filtered[[i]])[1:15])), "Clustering_Summary.csv", sep=',',quote=F, append = T, row.names=F,col.names=F,na="")
       cat("q_value,", file = "Clustering_Summary.csv",append=T)
       write.table(t(tm_filtered[[i]][1:15,4]), "Clustering_Summary.csv", sep=',',quote=F, append = T, row.names=F,col.names=F,na="")
       cat("count,", file = "Clustering_Summary.csv",append=T)

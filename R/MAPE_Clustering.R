@@ -525,10 +525,19 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
       cat("Key words,", file = "Clustering_Summary.csv",append=T)
       write.table(t(as.character(rownames(tm_filtered[[i]])[1:15])), "Clustering_Summary.csv", sep=',',quote=F, append = T, row.names=F,col.names=F,na="")
       cat("q_value,", file = "Clustering_Summary.csv",append=T)
+      
+      if (all(is.na(tm_filtered[[i]][1:15]))){
+      write.table(t(tm_filtered[[i]][1:15]), "Clustering_Summary.csv", sep=',',quote=F, append = T, row.names=F,col.names=F,na="")
+      cat("count,", file = "Clustering_Summary.csv",append=T)
+      write.table(t(tm_filtered[[i]][1:15]), "Clustering_Summary.csv", sep=',',quote=F, append = T, row.names=F,col.names=F,na="")
+      write.table(topGO.summary[[i]], "Clustering_Summary.csv", sep=",",quote=T, append = T, row.names=F,col.names=F)}
+      
+      else {
       write.table(t(tm_filtered[[i]][1:15,4]), "Clustering_Summary.csv", sep=',',quote=F, append = T, row.names=F,col.names=F,na="")
       cat("count,", file = "Clustering_Summary.csv",append=T)
       write.table(t(tm_filtered[[i]][1:15,1]), "Clustering_Summary.csv", sep=',',quote=F, append = T, row.names=F,col.names=F,na="")
       write.table(topGO.summary[[i]], "Clustering_Summary.csv", sep=",",quote=T, append = T, row.names=F,col.names=F)
+      }
     }
   }
   i=k

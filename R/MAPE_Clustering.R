@@ -73,7 +73,7 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
 #  if (!all(1:k %in% unique(results$clustering))){
 #    stop('Please choose a smaller number of clusters k or choose a larger FDR cutoff to select more pathways for clustering')
 #  }
-  k = max(results$clustering)
+  k = max(results2)
   pdf(paste(output_clustering,"/silhouette_plot.pdf",sep=""))
   plot(sil, nmax= 80, cex.names=0.6)
   dev.off()

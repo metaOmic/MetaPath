@@ -65,12 +65,6 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
                                        colnames(new.kappa.result)%in%names(results2)]
     sil <- silhouette(results2, (1-new.kappa.result), diss=T)
   }
-  pdf(paste(output_clustering,"/silhouette_plot.pdf",sep=""))
-  plot(sil, nmax= 80, cex.names=0.6)
-  dev.off()
-  pdf(paste(output_clustering,"/silhouette_width.pdf",sep=""))
-  hist(sil[,3],breaks=30)
-  dev.off() 
   
   singleton<-results$clustering[!names(results$clustering)%in%names(results2)]
   singleton[1:length(singleton)]<- max(results2)+1
@@ -79,6 +73,15 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
   if (!all(1:k %in% unique(results$clustering))){
     stop('Please choose a smaller number of clusters k or choose a larger FDR cutoff to select more pathways for clustering')
   }
+  
+  pdf(paste(output_clustering,"/silhouette_plot.pdf",sep=""))
+  plot(sil, nmax= 80, cex.names=0.6)
+  dev.off()
+  pdf(paste(output_clustering,"/silhouette_width.pdf",sep=""))
+  hist(sil[,3],breaks=30)
+  dev.off() 
+  
+
   
   
   #================================

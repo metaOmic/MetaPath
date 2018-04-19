@@ -6,8 +6,7 @@ Date: 2016-08-24
 Author: Xiangrui Zeng, Kui Shen, Zhou Fang, Chien-wei Lin and Geroge Tseng
 Maintainer: Kui Shen <kuishen@alumni.pitt.edu>
 Depends: R (>= 3.0.0),Biobase,GSEABase,genefilter,impute,ConsensusClusterPlus,
-    irr,cluster,gplots,ggplot2,AnnotationDbi,Rgraphviz,shape
-Imports: MetaDE
+    irr,cluster,gplots,ggplot2,AnnotationDbi,Rgraphviz,shape,MetaDE
 Description: Perform the Meta-analysis for Pathway Enrichment (MAPE)
     methods introduced by Shen and Tseng (2010). It includes functions to
     automatically perform MAPE_G (integrating multiple studies at

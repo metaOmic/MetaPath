@@ -15,29 +15,30 @@
 ##' data.type <- "continuous"
 ##' ind.method <- c('limma','limma','limma')
 ##' resp.type <- "twoclass"
-##' MAPE2.0_result = MAPE2.0(arraydata = Leukemia,clinical.data = clinical,label = "label",
-##'                         resp.type=resp.type,stat='maxP',method = "CPI", enrichment = "Fisher's exact", 
-##'                         DEgene.number = 400,size.min=15,size.max=500,data.type=data.type,
-##'                         ind.method=ind.method,ref.level=ref.level,select.group=select.group, 
-##'                         paired = paired)
-##' MAPE.kappa_result = MAPE.Kappa(summary = MAPE2.0_result$summary, software = MAPE2.0_result$method,
-##'                                pathway = MAPE2.0_result$pathway, max_k = 10, q_cutoff = 0.0005,
-##'                                output_dir = tempdir())
-##' MAPE.Clustering(summary = MAPE2.0_result$summary,Num_Clusters=5,
-##'                Num_of_gene_lists = MAPE2.0_result$Num_of_gene_lists,
-##'                genelist = MAPE2.0_result$genelist,kappa.result = MAPE.kappa_result$kappa, 
-##'                pathway = MAPE2.0_result$pathway, enrichment = MAPE2.0_result$enrichment,
-##'                method = MAPE.kappa_result$method,software = MAPE2.0_result$method,
-##'                output_dir = getwd())
+##' MAPE2.0_result = MAPE2.0(arraydata = Psychiatry_diseases$expr, clinical.data = Psychiatry_diseases$clinical, label = "response",pmtx = NULL,
+##'                         pathway = c(Biocarta.genesets,GOBP.genesets,GOCC.genesets,GOMF.genesets,KEGG.genesets,Reactome.genesets), 
+##'                         data.type ="continuous", resp.type = "twoclass",method = "CPI",
+##'                         ind.method = rep("limma",length(Psychiatry_diseases$expr)),paired = rep(FALSE,length(Psychiatry_diseases$expr)),
+##'                         select.group = c("CASE","CTRL"),ref.level ="CTRL",tail="abs",
+##'                         enrichment = "Fisher's exact", DEgene.number = 400,stat = "AW Fisher")
+##' MAPE.kappa_result = MAPE.Kappa(summary = CPI_result$summary,
+##'                                pathway = CPI_result$pathway, max_k = 15, q_cutoff = 0.0005,
+##'                                software = CPI_result$method)
+##' MAPE.Clustering(MAPE.Clustering(summary=CPI_result$summary,Num_Clusters = 7, 
+##'                                 kappa.result = CPI.kappa_result$kappa,sil_cut=0.1,
+##'                                 Num_of_gene_lists=CPI_result$Num_of_gene_lists,genelist =CPI_result$genelist,
+##'                                 pathway=CPI_result$pathway, enrichment=CPI_result$enrichment,
+##'                                 method=CPI.kappa_result$method,software=CPI_result$method,
+##'                                 n.text.permute = 10000)
 
 MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.result, Num_of_gene_lists, 
-                            genelist = NULL, pathway, enrichment,method,software,
-                            output_dir = getwd())
+                            genelist = NULL, pathway, enrichment,method,software, sil_cut = 0.1,
+                            n.text.permute = 1000, output_dir = getwd(),parallel=FALSE)
   {
   wd = getwd()
   k = Num_Clusters
   d = as.dist(1-kappa.result)
-  results <- pam(d, k, diss=T)
+  results <- pam(d, k, diss=T)#K medoids
   
   b = summary
   dir.create(paste(output_dir,"/Clustering_files","_",Num_Clusters,"_","clusters",sep=""))
@@ -46,7 +47,7 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
   
   k <- k+1
   k_org = k
-  sil_cut <- 0.1
+  sil_cut <- sil_cut
   results2 <- results$clustering
   new.kappa.result<-kappa.result
   i<-0
@@ -60,23 +61,23 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
     results2temp<-results2
     for(d in 1:length(results2)){
       results2[d]<-rank(unique(results2temp))[which(unique(results2temp)==results2temp[d])]
-    }
+    }#rename cluster index, so it is integer from 1 to k
     
     new.kappa.result<-new.kappa.result[rownames(new.kappa.result)%in%names(results2),
                                        colnames(new.kappa.result)%in%names(results2)]
-    sil <- silhouette(results2, (1-new.kappa.result), diss=T)
+    sil <- silhouette(results2, (1-new.kappa.result), diss=T)#recalculate silhoutte
   }
   
-  singleton<-results$clustering[!names(results$clustering)%in%names(results2)]
-  singleton[1:length(singleton)]<- max(results2)+1
+  singleton<-results$clustering[!names(results$clustering)%in%names(results2)]#singleton pathways
+  singleton[1:length(singleton)]<- max(results2)+1#label singleton as the number above total number of clusters
   results2<-c(results2,singleton)
   results2 <- results2[order(results2)]
 #  if (!all(1:k %in% unique(results$clustering))){
 #    stop('Please choose a smaller number of clusters k or choose a larger FDR cutoff to select more pathways for clustering')
 #  }
-  k = max(results2)
+  k = max(results2)#k is #of clusters(except singleton)+1
   if (k != k_org){warning(paste('Due to empty cluster(s), the cluster number is reduced from',
-                               k_org - 1, 'to', k-1))}
+                               k_org - 1, 'to', k-1))}#when >=one cluster being removed
   pdf(paste(output_clustering,"/silhouette_plot.pdf",sep=""))
   plot(sil, nmax= 80, cex.names=0.6)
   dev.off()
@@ -405,64 +406,115 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
                   else -0.2)
   }
   dev.off()
+  #========================================================================================
+  #MDS for all cluster, based on kappa similarity
+  #========================================================================================  
+  cluster.assign = results2
+  fit <- cmdscale(as.dist(1-kappa.result),k=2)
+  x <- fit[,1]
+  y <- fit[,2]
+  xlimit <- ifelse(abs(min(x))>abs(max(x)),abs(min(x)),abs(max(x)))
+  ylimit <- ifelse(abs(min(y))>abs(max(y)),abs(min(y)),abs(max(y)))
+  xcenter <- tapply(x,as.factor(cluster.assign),mean)
+  ycenter <- tapply(y,as.factor(cluster.assign),mean)
   
+  
+  C <- length(unique(cluster.assign))
+  unique.color <- rainbow(C)
+  unique.shape <- 1:C
+  sizes <- shapes <- colors <- cluster.assign
+  for(i in 1:(C)){
+    colors[cluster.assign==i] <- unique.color[i]
+    shapes[cluster.assign==i] <- unique.shape[i]
+    sizes[cluster.assign==i] <- 2
+  }
+  if(!is.null(singleton)){
+    colors[cluster.assign== max(cluster.assign)] <- "gray50"
+    shapes[cluster.assign== max(cluster.assign)] <- 20 
+    sizes[cluster.assign== max(cluster.assign)] <- 2
+  }
+  
+  pdf(paste(output_clustering,"/MDS_clusters_kappa_numbers_all",".pdf",sep=""))
+      p <- ggplot() +
+        ggtitle("") +
+        xlab("Coordinate 1") + ylab("Coordinate 2") + 
+        xlim(c(-xlimit,xlimit)) + ylim(c(-ylimit,ylimit)) + 
+        geom_point(aes(x, y), shape=shapes, 
+                   color = colors ,size=sizes) +
+        geom_point(aes(xcenter,ycenter),
+                   shape=unique.shape, color = unique.color, 
+                   size =5) + 
+        theme_bw() + 
+        theme(panel.grid.major = element_blank(), 
+              panel.grid.minor = element_blank(),
+              plot.title = element_text(size = 15, hjust=0.5,face="bold"),
+              axis.text.x = element_text(size = 12),
+              axis.text.y = element_text(size = 12))
+      print(p)
+      dev.off()
+      
   
   
   #=============================
   ##### Text Mining
   #=============================
-  cat("Performing Text Mining Analysis...\n")
-  data(hashtb)
-  hashtb = hashtb[hashtb [,2]%in%which(pathways %in% names(pathway)),]
-  tmk = list()
-  nperm = 1000
-  if (nrow(hashtb) == 0){
-    for (i in 1:(k-1)){
-      tmk[[i]] = matrix(NA,nrow = 1,ncol = 4)
-    }
-  }
-  else{
-  for (i in 1:(k-1)){
-    e = results2[results2 == i]
-    e = which(pathways %in% names(e))
-    hashcl = hashtb[hashtb [,2]%in%e,]
-    hashcl = hashcl[duplicated(hashcl[,1]) | duplicated(hashcl[,1], fromLast=TRUE),]
-    if (nrow(hashcl) != 0){
-      hashf = hashcl
-      hashf[,1] = 1
-      hashf = aggregate(hashf[,-2] ~ rownames(hashf),data=hashf, FUN=sum)
-      rownames(hashf) = hashf[,1]
-      hashf = hashf[,-1]
-      colnames(hashf) = c("count","sum")
-      hashap = hashcl
-      hashap[] = 0 
-      mperm = matrix(nrow = nrow(hashf),ncol = nperm)
-      for (j in 1:nperm){
-        subtb = hashtb[hashtb [,2]%in%sample(1:length(pathways),length(e)),]
-        subtb = rbind(subtb,hashap)
-        subtb = subtb[rownames(subtb) %in% rownames(hashap),]
-        subtb[,1] = 1
-        subtb = aggregate(subtb[,-2] ~ rownames(subtb),data=subtb, FUN=sum)
-        rownames(subtb) = subtb[,1]
-        subtb = subtb[,-1]
-        colnames(subtb) = c("count","sum")
-        subtb = subtb[rownames(subtb) %in% rownames(hashf),]
-        mperm[,j] = subtb[,2]
+      cat("Performing Text Mining Analysis...\n")
+      hashtbAll = hashtb
+      hashtb = hashtb[hashtb[,3]%in%which(pathways %in% names(pathway)),]
+      tmk = list()
+      nperm = n.text.permute
+      if (nrow(hashtb) == 0){
+        for (i in 1:(k-1)){
+          tmk[[i]] = matrix(NA,nrow = 1,ncol = 4)
+        }
+      }else{
+        paraFunc = function(i){
+          e = results2[results2 == i]#names are names of pathways in ith cluster
+          e = which(pathways %in% names(e))#pathways index of pathways in ith cluster
+          hashcl = hashtb[hashtb [,3]%in%e,]#noun phrases appeared in ith cluster
+          hashcl = hashcl[duplicated(hashcl[,2]) | duplicated(hashcl[,2], fromLast=TRUE),]
+          if (nrow(hashcl) != 0){
+            hashf = hashcl
+            hashf[,2] = 1
+            hashf = aggregate(hashf[,c("row","value")],by = hashf["phrase"],FUN=sum)
+            #aggregate nouns in cluster i: noun;#appearance in cluster;sum of penalized value
+            rownames(hashf) = hashf[,"phrase"]
+            hashf = hashf[,-1]
+            colnames(hashf) = c("count","sum") #count: count noun occurance in each cluster
+            hashap = hashcl#to record noun phrases name in this cluster
+            hashap[,c(2,3,4)] = 0 #dim as hashcl
+            mperm = matrix(nrow = nrow(hashf),ncol = nperm)
+            for (j in 1:nperm){
+              subtb = hashtbAll[hashtbAll[,3]%in%sample(1:length(pathways),length(e)),]#consider permutating from all possible pathways
+              subtb = rbind(subtb,hashap)#make sure rownames of (subtb) includes NPs appeared in original pathways
+              subtb = subtb[subtb$phrase %in% hashap$phrase,]#test NPs included in original pathways
+              subtb[,2] = 1
+              subtb = aggregate(subtb[,c("row","value")],by = subtb["phrase"],FUN=sum)
+              rownames(subtb) = subtb[,"phrase"]
+              subtb = subtb[,-1]
+              colnames(subtb) = c("count","sum") 
+              mperm[,j] = subtb[,2]
+            }
+            hashf[,"p-value"] = apply(cbind(hashf[,2],mperm),1,
+                                      function(x)((nperm + 2)-rank(x)[1])/(nperm + 1))
+            hashf[,"q-vlaue"] = p.adjust(hashf[,"p-value"],method = "BH")
+            tmk = hashf[order(hashf[,3],-hashf[,2]),]#order first by pvalue, then statistic T
+          }
+          else {tmk = matrix(NA,nrow = 1,ncol = 4)}
+          return(tmk)
+        }
+        if (parallel==TRUE){
+          tmk = mclapply(1:(k-1),paraFunc,mc.cores = 10)
+        }else{
+          tmk = lapply(1:(k-1),paraFunc)
+        }
       }
-      hashf[,"p-value"] = apply(cbind(hashf[,2],mperm),1,
-                                function(x)((nperm + 2)-rank(x)[1])/(nperm + 1))
-      hashf[,"q-vlaue"] = p.adjust(hashf[,"p-value"],method = "BH")
-      tmk[[i]] = hashf[order(hashf[,3],-hashf[,2]),]
-    }
-    else {tmk[[i]] = matrix(NA,nrow = 1,ncol = 4)}
-  }
-  }
-  # End of Text Mining
-  tm_filtered <- list() #filter out count 1, q 0.05
-  for (i in 1:(k-1)){ 
-    tm_filtered[[i]] <- tmk[[i]][ which((as.numeric(tmk[[i]][,4]) < 0.05)), ]
-  }
-  
+      # End of Text Mining
+      tm_filtered <- list() #filter out count 1, q 0.05
+      for (i in 1:(k-1)){ 
+        tm_filtered[[i]] <- tmk[[i]][ which((as.numeric(tmk[[i]][,4]) < 0.05)), ]
+      }
+      
   setwd(output_clustering)
   
   topGO.summary = GO.cluster.20
@@ -475,15 +527,15 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
     if (enrichment == "KS"){
       cat("ID,Term,NumGeneTotalInSet",file="Clustering_Summary.csv",append=T)
       for (n in 1:Num_of_gene_lists)
-        cat(",Study_p-value",colnames(summary[,n+2]),file="Clustering_Summary.csv",append=T)
+        cat(",Study_p-value",colnames(summary)[n+2],file="Clustering_Summary.csv",append=T)
       cat("\n",file="Clustering_Summary.csv",append=T)
     }
     else if (enrichment == "Fisher's exact"){
       cat("ID,Term,NumGeneTotalInSet",file="Clustering_Summary.csv",append=T)
       for (n in 1:Num_of_gene_lists)
-        cat(",NumDEGeneInSet_",colnames(summary[,n+2]),file="Clustering_Summary.csv",append=T)
+        cat(",NumDEGeneInSet_",colnames(summary)[n+2],file="Clustering_Summary.csv",append=T)
       for (n in 1:Num_of_gene_lists)
-        cat(",DEGeneInSet_",colnames(summary[,n+2]),file="Clustering_Summary.csv",append=T)
+        cat(",DEGeneInSet_",colnames(summary)[n+2],file="Clustering_Summary.csv",append=T)
       cat("\n",file="Clustering_Summary.csv",append=T)
     }
   }
@@ -551,6 +603,24 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
   i=k
   cat(paste("\nSingleton Term", "\n", sep = ""), file = "Clustering_Summary.csv", append = T)
   write.table(topGO.summary[[i]], "Clustering_Summary.csv", sep=",",quote=T, append = T, row.names=F,col.names=F)
-  setwd(wd)
   
+  #=============================
+  ##### Hierarchical Clustering
+  #=============================
+  pdf("CPI_hclust_average.pdf",width = 7.5,height = 7.5)
+  cluster.num = c("I","II","III","IV","V","VI","VII","VIII")
+  par(mfrow=c(3,3))
+  for (c in 1:length(unique(results2))){
+    pathways = names(results2)[which(results2==c)]
+    pmat = summary[pathways,-which(colnames(summary) %in% c("q_value_meta","p_value_meta"))]
+    d = dist(t(pmat))
+    hc1 = hclust(d, method = "average")
+    
+    title = paste("Cluster ",cluster.num[c],sep="")
+    plot(hc1, cex = 1.2, hang = -1,main= title,xlab = NULL,cex.main=2)
+
+  }
+  dev.off()
+  
+  setwd(wd)
 }

@@ -4,16 +4,34 @@
 \alias{MAPE2.0}
 \title{Perform the Meta-Analysis for Pathway Enrichment}
 \usage{
-MAPE2.0(arraydata = NULL, clinical.data = NULL, label = NULL,
-  pmtx = NULL, pathway = c(Biocarta.genesets, GOBP.genesets, GOCC.genesets,
-  GOMF.genesets, KEGG.genesets, Reactome.genesets),
-  data.type = c("continuous", "discrete"), covariate = NULL, ref.level,
-  ind.method, select.group, tail = "abs", resp.type = c("twoclass",
-  "multiclass", "continuous", "survival"), method = c("CPI", "MAPE"),
-  enrichment = c("KS", "Fisher's exact"), DEgene.number = 200,
-  stat = c("Fisher", "maxP", "minP", "rth", "AW Fisher"), rth.value = NULL,
-  permute = F, nperm = 500, size.min = 15, size.max = 500,
-  qvalue.cal = c("estimate", "permutation"))
+MAPE2.0(
+  arraydata = NULL,
+  clinical.data = NULL,
+  label = NULL,
+  pmtx = NULL,
+  pathway = c(Biocarta.genesets, GOBP.genesets, GOCC.genesets, GOMF.genesets,
+    KEGG.genesets, Reactome.genesets),
+  data.type = c("continuous", "discrete"),
+  mixed = NULL,
+  mix.type = NULL,
+  covariate = NULL,
+  ref.level,
+  paired,
+  ind.method,
+  select.group,
+  tail = "abs",
+  resp.type = c("twoclass", "multiclass", "continuous", "survival"),
+  method = c("CPI", "MAPE"),
+  enrichment = c("KS", "Fisher's exact"),
+  DEgene.number = 200,
+  stat = c("Fisher", "maxP", "minP", "rth", "AW Fisher"),
+  rth.value = NULL,
+  permute = F,
+  nperm = 500,
+  size.min = 15,
+  size.max = 500,
+  qvalue.cal = c("estimate", "permutation")
+)
 }
 \arguments{
 \item{arraydata}{The arraydata is a list of microarray data sets. Each microarray data set can be
@@ -57,7 +75,7 @@ For example,rth.value = 2.}
 
 \item{size.min}{The minimum size of pathways to be considered. The default value is 15.}
 
-\item{qvalue.cal}{The method to calculate the q-values if permute is true. The default method is to 
+\item{qvalue.cal}{The method to calculate the q-values if permute is true. The default method is to
 calcuate the q-values based on the permutation method. If qvalue.cal='estimate', the q-values
 were estimated based on the Storey's method.}
 
@@ -70,7 +88,7 @@ The qvalue and pvalue of each pathway including Meta qvalue and Meta pvalue.
 This is the first major function in the MetaPath2.0 package which combines the Meta-analysis
 for Pathway Enrichment (MAPE) methods introduced by Shen and Tseng (2010) and the
 Comparative Pathway Integrator (CPI) method introduced by Fang and Tseng (2016).
-The default function is CPI which performs MAPE_P (integrating multiple studies at pathway level) 
+The default function is CPI which performs MAPE_P (integrating multiple studies at pathway level)
 with Adaptively Weighted Fisher's method as Meta-analysis statistics. The other function, MAPE,
 automatically performs MAPE_G (integrating multiple studies at gene level), MAPE_P and
 MAPE_I (a hybrid method integrating MAEP_G and MAPE_P methods).
@@ -91,17 +109,17 @@ ref.level <- "inv(16)"
 data.type <- "continuous"
 ind.method <- c('limma','limma','limma')
 resp.type <- "twoclass"
+paired <- rep(FALSE,length(Leukemia))
 MAPE2.0_result_CPI = MAPE2.0(arraydata = Leukemia,clinical.data = clinical,label = "label",
-                        resp.type=resp.type,stat='maxP',method = "CPI", enrichment = "Fisher's exact", 
+                        resp.type=resp.type,stat='maxP',method = "CPI", enrichment = "Fisher's exact",
                         DEgene.number = 400,size.min=15,size.max=500,data.type=data.type,
-                        ind.method=ind.method,ref.level=ref.level,select.group=select.group)
+                        ind.method=ind.method,ref.level=ref.level,paired=paired,select.group=select.group)
 
 MAPE2.0_result_MAPE = MAPE2.0(arraydata = Leukemia,clinical.data = clinical,label = "label",
-                        resp.type=resp.type,stat='minP',method = "MAPE", enrichment = "KS", 
+                        resp.type=resp.type,stat='minP',method = "MAPE", enrichment = "KS",
                         DEgene.number = 400,size.min=15,size.max=500,data.type=data.type,
-                        ind.method=ind.method,ref.level=ref.level,select.group=select.group)
+                        ind.method=ind.method,ref.level=ref.level,paired=paired,select.group=select.group)
 }
 \author{
 Kui Shen, Xiangrui Zeng and George Tseng.
 }
-

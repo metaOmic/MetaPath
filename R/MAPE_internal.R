@@ -4,7 +4,7 @@
 ## @author Kui Shen, Xiangrui Zeng and George Tseng.
 
 ###########################
-cor.func <- function (x, y) 
+cor.func <- function (x, y)
 {
   n <- length(y)
   xbar <- x %*% rep(1/n, n)
@@ -19,7 +19,7 @@ cor.func <- function (x, y)
 
 
 ###########################
-coxfunc <- function (x, y, censoring.status) 
+coxfunc <- function (x, y, censoring.status)
 {
   junk <- coxscor(x, y, censoring.status)
   scor <- junk$scor
@@ -30,7 +30,7 @@ coxfunc <- function (x, y, censoring.status)
 
 
 ###########################
-cox.perm.sample <- function (expr, testgroup, censoring, nperm) 
+cox.perm.sample <- function (expr, testgroup, censoring, nperm)
 {
   obs = coxfunc(expr, testgroup, censoring)$tt
   perms = matrix(NA, nrow(expr), nperm)
@@ -39,7 +39,7 @@ cox.perm.sample <- function (expr, testgroup, censoring, nperm)
     perms.mtx[i, ] = sample(1:length(testgroup), size = length(testgroup))
   }
   for (t1 in 1:nperm) {
-    perms[, t1] = coxfunc(expr, testgroup[perms.mtx[t1, ]], 
+    perms[, t1] = coxfunc(expr, testgroup[perms.mtx[t1, ]],
                           censoring)$tt
   }
   rownames(perms) = rownames(expr)
@@ -51,7 +51,7 @@ cox.perm.sample <- function (expr, testgroup, censoring, nperm)
 
 
 ###########################
-coxscor <- function (x, y, ic, offset = rep(0, length(y))) 
+coxscor <- function (x, y, ic, offset = rep(0, length(y)))
 {
   n <- length(y)
   nx <- nrow(x)
@@ -81,7 +81,7 @@ coxscor <- function (x, y, ic, offset = rep(0, length(y)))
 
 
 #########################
-coxstuff <- function (x, y, ic, offset = rep(0, length(y))) 
+coxstuff <- function (x, y, ic, offset = rep(0, length(y)))
 {
   fail.times <- unique(y[ic == 1])
   nf <- length(fail.times)
@@ -109,13 +109,13 @@ coxstuff <- function (x, y, ic, offset = rep(0, length(y)))
   for (j in 1:nf) {
     dd[(y == fail.times[j]) & (ic == 1)] <- d[j]
   }
-  return(list(fail.times = fail.times, s = s, d = d, dd = dd, 
+  return(list(fail.times = fail.times, s = s, d = d, dd = dd,
               nf = nf, nn = nn, nno = nno))
 }
 
 
 ##########################
-coxvar <- function (x, y, ic, offset = rep(0, length(y)), coxstuff.obj = NULL) 
+coxvar <- function (x, y, ic, offset = rep(0, length(y)), coxstuff.obj = NULL)
 {
   nx <- nrow(x)
   n <- length(y)
@@ -142,9 +142,9 @@ coxvar <- function (x, y, ic, offset = rep(0, length(y)), coxstuff.obj = NULL)
   w <- d[1] * (s - sx * sx)
   for (i in 2:nf) {
     oo <- (1:n)[y >= fail.times[i - 1] & y < fail.times[i]]
-    sx <- (1/nno[i]) * (nno[i - 1] * sx - rowSums(x[, oo, 
+    sx <- (1/nno[i]) * (nno[i - 1] * sx - rowSums(x[, oo,
                                                     drop = F] * exp(offset[oo])))
-    s <- (1/nno[i]) * (nno[i - 1] * s - rowSums(x2[, oo, 
+    s <- (1/nno[i]) * (nno[i - 1] * s - rowSums(x2[, oo,
                                                    drop = F] * exp(offset[oo])))
     w <- w + d[i] * (s - sx * sx)
   }
@@ -153,7 +153,7 @@ coxvar <- function (x, y, ic, offset = rep(0, length(y)), coxstuff.obj = NULL)
 
 
 #######################
-reg.perm.sample <- function (expr, testgroup, nperm) 
+reg.perm.sample <- function (expr, testgroup, nperm)
 {
   obs = cor.func(expr, testgroup)$tt[, 1]
   perms = matrix(NA, nrow(expr), nperm)
@@ -162,7 +162,7 @@ reg.perm.sample <- function (expr, testgroup, nperm)
     perms.mtx[i, ] = sample(1:length(testgroup), size = length(testgroup))
   }
   for (t1 in 1:nperm) {
-    perms[, t1] = cor.func(expr, testgroup[perms.mtx[t1, 
+    perms[, t1] = cor.func(expr, testgroup[perms.mtx[t1,
                                                      ]])$tt[, 1]
   }
   rownames(perms) = rownames(expr)
@@ -174,7 +174,7 @@ reg.perm.sample <- function (expr, testgroup, nperm)
 
 
 ######################
-Tperm.sample <- function (x, fac, nperm) 
+Tperm.sample <- function (x, fac, nperm)
 {
   obs = genefilter::rowttests(x, fac, tstatOnly = T)$statistic
   names(obs) = rownames(x)
@@ -191,39 +191,39 @@ Tperm.sample <- function (x, fac, nperm)
 
 
 #######################
-F.perm.sample <- function(x, fac, nperm) 
+F.perm.sample <- function(x, fac, nperm)
 {
   obs = genefilter::rowFtests(x, fac, var.equal = TRUE)$statistic
   names(obs)=rownames(x)
   perms= matrix(NA,  nrow(x),  nperm)
-  
+
   for(t1 in 1:nperm){
     perms[,t1]=genefilter::rowFtests(x, sample(fac), var.equal = TRUE)$statistic
   }
   rownames(perms)=rownames(x)
   colnames(perms)=paste('B',1:nperm,sep="")
-  
+
   obs=abs(obs); perms=abs(perms)
-  
+
   return(list(obs=obs, perms=perms))
 }
 
 
 ######################
-pqvalues.compute <- function (Stat.0, Stat.B, Stat.type, PI0 = 1) 
+pqvalues.compute <- function (Stat.0, Stat.B, Stat.type, PI0 = 1)
 {
   Stat.0 = as.matrix(abs(Stat.0))
   Stat.B = as.matrix(abs(Stat.B))
-  if (nrow(Stat.0) != nrow(Stat.B)) 
+  if (nrow(Stat.0) != nrow(Stat.B))
     stop("# of rows of Stat.0 and Stat.B should be same")
   B = ncol(Stat.B)
   G = nrow(Stat.B)
   if (Stat.type == "Tstat") {
     Stat.all = cbind(Stat.0, Stat.B)
-    count.0 = apply(Stat.0, 1, function(x) sum(x <= Stat.0, 
+    count.0 = apply(Stat.0, 1, function(x) sum(x <= Stat.0,
                                                na.rm = T))
     Stat.rank.all = rank(-as.vector(Stat.all), ties.method = "max")
-    pvalue.0 = as.matrix(Stat.rank.all[1:G] - count.0)/(B * 
+    pvalue.0 = as.matrix(Stat.rank.all[1:G] - count.0)/(B *
                                                           G)
     if (is.null(PI0)) {
       PI0 = sum(pvalue.0 >= 0.5)/(0.5 * G)
@@ -231,7 +231,7 @@ pqvalues.compute <- function (Stat.0, Stat.B, Stat.type, PI0 = 1)
     else {
       PI0 = 1
     }
-    qvalue.0 = PI0 * pvalue.0 * G/(apply(Stat.0, 1, function(x) sum(x <= 
+    qvalue.0 = PI0 * pvalue.0 * G/(apply(Stat.0, 1, function(x) sum(x <=
                                                                       Stat.0, na.rm = T)))
     qvalue.0 = ifelse(qvalue.0 <= 1, qvalue.0, 1)
     Stat.rank = rank(-as.vector(Stat.B), ties.method = "max")
@@ -243,7 +243,7 @@ pqvalues.compute <- function (Stat.0, Stat.B, Stat.type, PI0 = 1)
     Stat.all = cbind(Stat.0, Stat.B)
     count.0 = apply(Stat.0, 1, function(x) sum(x >= Stat.0))
     Stat.rank.all = rank(as.vector(Stat.all), ties.method = "max")
-    pvalue.0 = as.matrix(Stat.rank.all[1:G] - count.0)/(B * 
+    pvalue.0 = as.matrix(Stat.rank.all[1:G] - count.0)/(B *
                                                           G)
     if (is.null(PI0)) {
       PI0 = sum(pvalue.0 >= 0.5)/(0.5 * G)
@@ -251,7 +251,7 @@ pqvalues.compute <- function (Stat.0, Stat.B, Stat.type, PI0 = 1)
     else {
       PI0 = 1
     }
-    qvalue.0 = PI0 * pvalue.0 * G/(apply(Stat.0, 1, function(x) sum(x >= 
+    qvalue.0 = PI0 * pvalue.0 * G/(apply(Stat.0, 1, function(x) sum(x >=
                                                                       Stat.0, na.rm = T)))
     qvalue.0 = ifelse(qvalue.0 <= 1, qvalue.0, 1)
     Stat.rank = rank(as.vector(Stat.B), ties.method = "max")
@@ -262,15 +262,15 @@ pqvalues.compute <- function (Stat.0, Stat.B, Stat.type, PI0 = 1)
   else {
     stop("wrong stat.type")
   }
-  return(list(pvalue.0 = pvalue.0, pvalue.B = pvalue.B, qvalue.0 = qvalue.0, 
+  return(list(pvalue.0 = pvalue.0, pvalue.B = pvalue.B, qvalue.0 = qvalue.0,
               PI0 = PI0))
 }
 
 
 ##########################
 EnrichmentC_Exact<- function (madata, label, censoring = NULL, DB.matrix, DEgene.number = DEgene.number,
-                              size.min = 15,size.max = 500, nperm = 500, gene.pvalues = NULL, 
-                              resp.type = NULL) 
+                              size.min = 15,size.max = 500, nperm = 500, gene.pvalues = NULL,
+                              resp.type = NULL)
 {
   if (!is.null(madata)) {
     genes.in.study = featureNames(madata)
@@ -280,19 +280,19 @@ EnrichmentC_Exact<- function (madata, label, censoring = NULL, DB.matrix, DEgene
       set2allgenes.mtx = as.matrix(set2allgenes.mtx[, gene.common])
     }
     else {
-      set2allgenes.mtx = t(as.matrix(set2allgenes.mtx[, 
+      set2allgenes.mtx = t(as.matrix(set2allgenes.mtx[,
                                                       gene.common]))
     }
     madata = madata[gene.common, ]
     if (resp.type == "twoclass") {
-      tstat = genefilter::rowttests(exprs(madata), as.factor(label), 
+      tstat = genefilter::rowttests(exprs(madata), as.factor(label),
                                     tstatOnly = F)
       p.values = (tstat$p.value)
       names(p.values) = rownames(tstat)
       gene.name.sort = names(sort(p.values, decreasing = F))
     }
     else if (resp.type == "multiclass") {
-      tstat = genefilter::rowFtests(exprs(madata), as.factor(label), 
+      tstat = genefilter::rowFtests(exprs(madata), as.factor(label),
                                     var.equal = TRUE)
       p.values = (tstat$p.value)
       names(p.values) = rownames(tstat)
@@ -328,7 +328,7 @@ EnrichmentC_Exact<- function (madata, label, censoring = NULL, DB.matrix, DEgene
     ####not in the gene list but in the pathway
     count_table[2,1]<-sum(genes.in.study%in% colnames(DB.matrix[,DB.matrix[i,]==1]))
     ####not in the gene list and not in the pathway
-    count_table[2,2]<-length(genes.in.study)-count_table[2,1]       
+    count_table[2,2]<-length(genes.in.study)-count_table[2,1]
     if(length(count_table)==4){
       pvalue.set.0[i,1] <- fisher.test(count_table, alternative="greater")$p}
   }
@@ -340,10 +340,10 @@ EnrichmentC_Exact<- function (madata, label, censoring = NULL, DB.matrix, DEgene
 
 ########################
 CPI_Exact <- function (study, label, censoring.status, DB.matrix, size.min = 15,
-                     DEgene.number = DEgene.number, size.max = 500, nperm = 500, 
-                     stat = NULL, rth.value = NULL,resp.type) 
+                       DEgene.number = DEgene.number, size.max = 500, nperm = 500,
+                       stat = NULL, rth.value = NULL,resp.type)
 {
-  if (is.null(names(study))) 
+  if (is.null(names(study)))
     names(study) = paste("study.", 1:length(study), sep = "")
   out = list()
   for (t1 in 1:length(study)) {
@@ -353,19 +353,19 @@ CPI_Exact <- function (study, label, censoring.status, DB.matrix, size.min = 15,
     if (resp.type == "survival") {
       censoring = madata[[censoring.status]]
     }
-    out[[t1]] = EnrichmentC_Exact(madata = madata, label = testlabel,DEgene.number = DEgene.number, 
-                                  censoring = censoring, DB.matrix = DB.matrix, size.min = size.min, 
+    out[[t1]] = EnrichmentC_Exact(madata = madata, label = testlabel,DEgene.number = DEgene.number,
+                                  censoring = censoring, DB.matrix = DB.matrix, size.min = size.min,
                                   size.max = size.max, nperm = nperm, resp.type = resp.type)
   }
   set.common = rownames(out[[1]]$pvalue.set.0)
   for (t1 in 2:length(study)) {
     set.common = intersect(set.common, rownames(out[[t1]]$pvalue.set.0))
   }
-  if (is.null(names(study))) 
+  if (is.null(names(study)))
     names(study) = paste("study.", 1:length(study), sep = "")
   pvalue.0.mtx = matrix(NA, length(set.common), length(study))
   for (t1 in 1:length(study)) {
-    pvalue.0.mtx[, t1] = out[[t1]]$pvalue.set.0[set.common, 
+    pvalue.0.mtx[, t1] = out[[t1]]$pvalue.set.0[set.common,
                                                 ]
   }
   genelist = list()
@@ -374,20 +374,22 @@ CPI_Exact <- function (study, label, censoring.status, DB.matrix, size.min = 15,
   }
   rownames(pvalue.0.mtx) = set.common
   rm(out)
-  
-  p_value_meta = aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)$pvalues
+
+  AW.fisher = aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)
+  p_value_meta = AW.fisher$pvalues
+  weights_meta = AW.fisher$weights
   q_value_meta = p.adjust(p_value_meta, "BH")
   summary<-data.frame(q_value_meta = q_value_meta,p_value_meta = p_value_meta,
                       p_data = pvalue.0.mtx)
-  return(list(summary = summary,genelist = genelist))
+  return(list(summary = summary,genelist = genelist,AW.weights = weights_meta))
 }
 
 
 ####################
-CPI_gene_KS <- function (study, label, censoring.status, DB.matrix, size.min = 15, 
-                       size.max = 500, nperm = 500, stat = NULL, rth.value = NULL, 
-                       resp.type) 
-{if (is.null(names(study))) 
+CPI_gene_KS <- function (study, label, censoring.status, DB.matrix, size.min = 15,
+                         size.max = 500, nperm = 500, stat = NULL, rth.value = NULL,
+                         resp.type)
+{if (is.null(names(study)))
   names(study) = paste("study.", 1:length(study), sep = "")
 out = list()
 for (t1 in 1:length(study)) {
@@ -397,19 +399,19 @@ for (t1 in 1:length(study)) {
   if (resp.type == "survival") {
     censoring = madata[[censoring.status]]
   }
-  out[[t1]] = Enrichment_KS_gene(madata = madata, label = testlabel, 
-                                 censoring = censoring, DB.matrix = DB.matrix, size.min = size.min, 
+  out[[t1]] = Enrichment_KS_gene(madata = madata, label = testlabel,
+                                 censoring = censoring, DB.matrix = DB.matrix, size.min = size.min,
                                  size.max = size.max, nperm = nperm, resp.type = resp.type)
 }
 set.common = rownames(out[[1]]$pvalue.set.0)
 for (t1 in 2:length(study)) {
   set.common = intersect(set.common, rownames(out[[t1]]$pvalue.set.0))
 }
-if (is.null(names(study))) 
+if (is.null(names(study)))
   names(study) = paste("study.", 1:length(study), sep = "")
-pvalue.B.array = array(data = NA, dim = c(length(set.common), 
+pvalue.B.array = array(data = NA, dim = c(length(set.common),
                                           nperm, length(study)))
-dimnames(pvalue.B.array) = list(set.common, paste("perm", 
+dimnames(pvalue.B.array) = list(set.common, paste("perm",
                                                   1:nperm, sep = ""), names(study))
 pvalue.0.mtx = matrix(NA, length(set.common), length(study))
 qvalue.0.mtx = matrix(NA, length(set.common), length(study))
@@ -422,19 +424,21 @@ rownames(qvalue.0.mtx) = set.common
 rownames(pvalue.0.mtx) = set.common
 rm(out)
 
-p_value_meta = aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)$pvalues
+AW.fisher = aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)
+p_value_meta = AW.fisher$pvalues
+weights_meta = AW.fisher$weights
 q_value_meta = p.adjust(p_value_meta, "BH")
 summary<-data.frame(q_value_meta = q_value_meta,p_value_meta = p_value_meta,
                     p_data = pvalue.0.mtx)
-return(list(summary = summary))
+return(list(summary = summary,AW.weights = weights_meta))
 }
 
 
 #########################
-CPI_sample_KS <- function (study, label, censoring.status = NULL, DB.matrix, size.min = 15, 
-                           size.max = 500, nperm = 500, stat, rth.value = NULL, resp.type) 
+CPI_sample_KS <- function (study, label, censoring.status = NULL, DB.matrix, size.min = 15,
+                           size.max = 500, nperm = 500, stat, rth.value = NULL, resp.type)
 {
-  if (is.null(names(study))) 
+  if (is.null(names(study)))
     names(study) = paste("study.", 1:length(study), sep = "")
   out = list()
   for (t1 in 1:length(study)) {
@@ -444,15 +448,15 @@ CPI_sample_KS <- function (study, label, censoring.status = NULL, DB.matrix, siz
     if (resp.type == "survival") {
       censoring = madata[[censoring.status]]
     }
-    out[[t1]] = Enrichment_KS_sample(madata = madata, label = testlabel, 
-                                     censoring = censoring, DB.matrix = DB.matrix, size.min = size.min, 
+    out[[t1]] = Enrichment_KS_sample(madata = madata, label = testlabel,
+                                     censoring = censoring, DB.matrix = DB.matrix, size.min = size.min,
                                      size.max = size.max, nperm = nperm, resp.type = resp.type)
   }
   common.pathway = rownames(out[[1]]$pvalue.set.0)
   for (t1 in 1:length(study)) {
     common.pathway = intersect(common.pathway, rownames(out[[t1]]$pvalue.set.0))
   }
-  pvalue.B.array = array(data = NA, dim = c(length(common.pathway), 
+  pvalue.B.array = array(data = NA, dim = c(length(common.pathway),
                                             nperm, length(study)))
   pvalue.0.mtx = matrix(NA, length(common.pathway), length(study))
   qvalue.0.mtx = matrix(NA, length(common.pathway), length(study))
@@ -460,32 +464,34 @@ CPI_sample_KS <- function (study, label, censoring.status = NULL, DB.matrix, siz
   colnames(pvalue.0.mtx) = names(study)
   rownames(qvalue.0.mtx) = common.pathway
   colnames(qvalue.0.mtx) = names(study)
-  dimnames(pvalue.B.array) = list(common.pathway, paste("perm", 
+  dimnames(pvalue.B.array) = list(common.pathway, paste("perm",
                                                         1:nperm, sep = ""), names(study))
   for (t1 in 1:length(study)) {
-    pvalue.B.array[, , t1] = out[[t1]]$pvalue.set.B[common.pathway, 
+    pvalue.B.array[, , t1] = out[[t1]]$pvalue.set.B[common.pathway,
                                                     ]
-    pvalue.0.mtx[, t1] = out[[t1]]$pvalue.set.0[common.pathway, 
+    pvalue.0.mtx[, t1] = out[[t1]]$pvalue.set.0[common.pathway,
                                                 ]
-    qvalue.0.mtx[, t1] = out[[t1]]$qvalue.set.0[common.pathway, 
+    qvalue.0.mtx[, t1] = out[[t1]]$qvalue.set.0[common.pathway,
                                                 ]
   }
-  
-  p_value_meta = aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)$pvalues
-  q_value_meta = p.adjust(p_value_meta, "BH") 
-  
+
+  AW.fisher = aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)
+  p_value_meta = AW.fisher$pvalues
+  weights_meta = AW.fisher$weights
+  q_value_meta = p.adjust(p_value_meta, "BH")
+
   summary<-data.frame(q_value_meta = q_value_meta,p_value_meta = p_value_meta,
                       p_data = pvalue.0.mtx)
-  
-  return(list(summary = summary))
+
+  return(list(summary = summary,AW.weights = weights_meta))
 }
 
 
 ############################
-EnrichmentM_Exact<- function (madata, label, censoring = NULL, DB.matrix = DB.matrix, 
+EnrichmentM_Exact<- function (madata, label, censoring = NULL, DB.matrix = DB.matrix,
                               DEgene.number = DEgene.number,
-                              size.min = 15,size.max = 500, nperm = 500, gene.pvalues = NULL, 
-                              resp.type = NULL,gene.name.sort,genes.in.study) 
+                              size.min = 15,size.max = 500, nperm = 500, gene.pvalues = NULL,
+                              resp.type = NULL,gene.name.sort,genes.in.study)
 {
   if (!is.null(madata)) {
     genes.in.study = featureNames(madata)
@@ -495,19 +501,19 @@ EnrichmentM_Exact<- function (madata, label, censoring = NULL, DB.matrix = DB.ma
       set2allgenes.mtx = as.matrix(set2allgenes.mtx[, gene.common])
     }
     else {
-      set2allgenes.mtx = t(as.matrix(set2allgenes.mtx[, 
+      set2allgenes.mtx = t(as.matrix(set2allgenes.mtx[,
                                                       gene.common]))
     }
     madata = madata[gene.common, ]
     if (resp.type == "twoclass") {
-      tstat = genefilter::rowttests(exprs(madata), as.factor(label), 
+      tstat = genefilter::rowttests(exprs(madata), as.factor(label),
                                     tstatOnly = F)
       p.values = (tstat$p.value)
       names(p.values) = rownames(tstat)
       gene.name.sort = names(sort(p.values, decreasing = F))
     }
     else if (resp.type == "multiclass") {
-      tstat = genefilter::rowFtests(exprs(madata), as.factor(label), 
+      tstat = genefilter::rowFtests(exprs(madata), as.factor(label),
                                     var.equal = TRUE)
       p.values = (tstat$p.value)
       names(p.values) = rownames(tstat)
@@ -543,7 +549,7 @@ EnrichmentM_Exact<- function (madata, label, censoring = NULL, DB.matrix = DB.ma
     ####not in the gene list but in the pathway
     count_table[2,1]<-sum(genes.in.study%in% colnames(DB.matrix[,DB.matrix[i,]==1]))
     ####not in the gene list and not in the pathway
-    count_table[2,2]<-length(genes.in.study)-count_table[2,1]       
+    count_table[2,2]<-length(genes.in.study)-count_table[2,1]
     if(length(count_table)==4){
       pvalue.set.0[i,1] <- fisher.test(count_table, alternative="greater")$p}
   }
@@ -560,10 +566,10 @@ EnrichmentM_Exact<- function (madata, label, censoring = NULL, DB.matrix = DB.ma
 
 ######################
 MAPE_P_Exact<-function (study, label, censoring.status, DB.matrix, size.min = 15,
-                        DEgene.number = DEgene.number, size.max = 500, nperm = 500, 
-                        stat = NULL, rth.value = NULL,resp.type) 
+                        DEgene.number = DEgene.number, size.max = 500, nperm = 500,
+                        stat = NULL, rth.value = NULL,resp.type)
 {
-  if (is.null(names(study))) 
+  if (is.null(names(study)))
     names(study) = paste("study.", 1:length(study), sep = "")
   out = list()
   for (t1 in 1:length(study)) {
@@ -574,14 +580,14 @@ MAPE_P_Exact<-function (study, label, censoring.status, DB.matrix, size.min = 15
       censoring = madata[[censoring.status]]
     }
     out[[t1]] = EnrichmentM_Exact(madata = madata, label = testlabel, DEgene.number = DEgene.number,
-                                  censoring = censoring, DB.matrix = DB.matrix, size.min = size.min, 
+                                  censoring = censoring, DB.matrix = DB.matrix, size.min = size.min,
                                   size.max = size.max, nperm = nperm, resp.type = resp.type)
   }
   set.common = rownames(out[[1]]$pvalue.set.0)
   for (t1 in 2:length(study)) {
     set.common = intersect(set.common, rownames(out[[t1]]$pvalue.set.0))
   }
-  if (is.null(names(study))) 
+  if (is.null(names(study)))
     names(study) = paste("study.", 1:length(study), sep = "")
   pvalue.0.mtx = matrix(NA, length(set.common), length(study))
   qvalue.0.mtx = matrix(NA, length(set.common), length(study))
@@ -618,7 +624,9 @@ MAPE_P_Exact<-function (study, label, censoring.status, DB.matrix, size.min = 15
     qvalue.meta = p.adjust(pvalue.meta,"BH")
   }
   else if (stat == "AW Fisher") {
-    pvalue.meta = matrix(aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)$pvalues,ncol = 1)
+    AW.fisher = aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)
+    pvalue.meta = matrix(AW.fisher$pvalues,ncol = 1)
+    weights.meta = AW.fisher$weights
     rownames(pvalue.meta) = set.common
     qvalue.meta = p.adjust(pvalue.meta, "BH")
   }
@@ -627,21 +635,26 @@ MAPE_P_Exact<-function (study, label, censoring.status, DB.matrix, size.min = 15
   }
   qvalue.meta = matrix(qvalue.meta,ncol = 1)
   rownames(qvalue.meta) = rownames(pvalue.meta)
-  return(list(pvalue.meta = pvalue.meta, qvalue.meta = qvalue.meta, 
-              qvalue.set.study = qvalue.0.mtx, pvalue.set.study = pvalue.0.mtx))
+  if (stat == "AW Fisher"){
+    return(list(pvalue.meta = pvalue.meta, qvalue.meta = qvalue.meta,
+                qvalue.set.study = qvalue.0.mtx, pvalue.set.study = pvalue.0.mtx,AW.weights = weights.meta))
+  }else{
+    return(list(pvalue.meta = pvalue.meta, qvalue.meta = qvalue.meta,
+                qvalue.set.study = qvalue.0.mtx, pvalue.set.study = pvalue.0.mtx))
+  }
 }
 
 
 ######################
-MAPE_G_Exact = function (study, label, censoring.status, DB.matrix, size.min = 15, 
-                         DEgene.number = DEgene.number,size.max = 500, nperm = 500, 
-                         stat = NULL,rth.value = NULL,resp.type) 
+MAPE_G_Exact = function (study, label, censoring.status, DB.matrix, size.min = 15,
+                         DEgene.number = DEgene.number,size.max = 500, nperm = 500,
+                         stat = NULL,rth.value = NULL,resp.type)
 {
   gene.common = featureNames(study[[1]])
   for (t1 in 2:length(study)) {
     gene.common = intersect(gene.common, featureNames(study[[t1]]))
   }
-  if (is.null(names(study))) 
+  if (is.null(names(study)))
     names(study) = paste("study.", 1:length(study), sep = "")
   madata = list()
   for (t1 in 1:length(study)) {
@@ -654,12 +667,12 @@ MAPE_G_Exact = function (study, label, censoring.status, DB.matrix, size.min = 1
     x = exprs(madata[[t1]])
     testlabel = madata[[t1]][[label]]
     if (resp.type == "twoclass") {
-      tstat = genefilter::rowttests(x, as.factor(testlabel), 
+      tstat = genefilter::rowttests(x, as.factor(testlabel),
                                     tstatOnly = F)
       Tstat.p[[t1]] = (tstat$p.value)
     }
     else if (resp.type == "multiclass") {
-      tstat = genefilter::rowFtests(x, as.factor(testlabel), 
+      tstat = genefilter::rowFtests(x, as.factor(testlabel),
                                     var.equal = TRUE)
       Tstat.p[[t1]] = (tstat$p.value)
     }
@@ -668,11 +681,11 @@ MAPE_G_Exact = function (study, label, censoring.status, DB.matrix, size.min = 1
         stop("Error: censoring.status is null")
       }
       censoring = madata[[t1]][[censoring.status]]
-      Tstat.p[[t1]] = cox.perm.sample(expr = x, testgroup = testlabel, 
+      Tstat.p[[t1]] = cox.perm.sample(expr = x, testgroup = testlabel,
                                       censoring = censoring, nperm = 500)
     }
     else if (resp.type == "continuous") {
-      Tstat.p[[t1]] = reg.perm.sample(expr = x, testgroup = testlabel, 
+      Tstat.p[[t1]] = reg.perm.sample(expr = x, testgroup = testlabel,
                                       nperm = 500)
     }
     else {
@@ -680,7 +693,7 @@ MAPE_G_Exact = function (study, label, censoring.status, DB.matrix, size.min = 1
     }
     out[[t1]] = list()
     if(resp.type %in% c("survival" , "continous")){
-      out[[t1]] = pqvalues.compute(Tstat.p[[t1]]$obs, Tstat.p[[t1]]$perms, 
+      out[[t1]] = pqvalues.compute(Tstat.p[[t1]]$obs, Tstat.p[[t1]]$perms,
                                    Stat.type = "Tstat")
     }
     else {
@@ -719,7 +732,9 @@ MAPE_G_Exact = function (study, label, censoring.status, DB.matrix, size.min = 1
     pvalue.meta = pchisq(P.0,DF,lower.tail = F)
   }
   else if (stat == "AW Fisher") {
-    pvalue.meta = matrix(aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)$pvalues,ncol = 1)
+    AW.fisher = aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)
+    pvalue.meta = matrix(AW.fisher$pvalues,ncol = 1)
+    weights.meta = AW.fisher$weights
     rownames(pvalue.meta) = gene.common
   }
   else {
@@ -730,22 +745,29 @@ MAPE_G_Exact = function (study, label, censoring.status, DB.matrix, size.min = 1
   gene.qvalues = p.adjust(gene.pvalues,"BH")
   gene.name.sort = names(sort(gene.pvalues, decreasing = F))
   meta.set = EnrichmentM_Exact(madata = NULL, label = NULL, DEgene.number = DEgene.number,
-                               DB.matrix = DB.matrix, size.min = size.min, size.max = size.max, 
+                               DB.matrix = DB.matrix, size.min = size.min, size.max = size.max,
                                nperm = nperm, gene.pvalues = gene.pvalues,
                                gene.name.sort = gene.name.sort ,genes.in.study = gene.common)
-  return(list(pvalue.meta = meta.set$pvalue.set.0, qvalue.meta = meta.set$qvalue.set.0, 
-              gene.meta.qvalues = gene.qvalues, 
-              gene.meta.pvalues = gene.pvalues, gene.study.qvalues = qvalue.0.mtx, 
-              gene.study.pvalues = pvalue.0.mtx))
+  if(stat == "AW Fisher"){
+    return(list(pvalue.meta = meta.set$pvalue.set.0, qvalue.meta = meta.set$qvalue.set.0,
+                gene.meta.qvalues = gene.qvalues,
+                gene.meta.pvalues = gene.pvalues, gene.study.qvalues = qvalue.0.mtx,
+                gene.study.pvalues = pvalue.0.mtx,AW.weights = weights.meta))
+  }else{
+    return(list(pvalue.meta = meta.set$pvalue.set.0, qvalue.meta = meta.set$qvalue.set.0,
+                gene.meta.qvalues = gene.qvalues,
+                gene.meta.pvalues = gene.pvalues, gene.study.qvalues = qvalue.0.mtx,
+                gene.study.pvalues = pvalue.0.mtx))
+  }
 }
 
 
 #########################
-MAPE_P_gene_KS = function (study, label, censoring.status, DB.matrix, size.min = 15, 
-                           size.max = 500, nperm = 500, stat = NULL, rth.value = NULL, 
-                           resp.type) 
+MAPE_P_gene_KS = function (study, label, censoring.status, DB.matrix, size.min = 15,
+                           size.max = 500, nperm = 500, stat = NULL, rth.value = NULL,
+                           resp.type)
 {
-  if (is.null(names(study))) 
+  if (is.null(names(study)))
     names(study) = paste("study.", 1:length(study), sep = "")
   out = list()
   for (t1 in 1:length(study)) {
@@ -755,19 +777,19 @@ MAPE_P_gene_KS = function (study, label, censoring.status, DB.matrix, size.min =
     if (resp.type == "survival") {
       censoring = madata[[censoring.status]]
     }
-    out[[t1]] = Enrichment_KS_gene(madata = madata, label = testlabel, 
-                                   censoring = censoring, DB.matrix = DB.matrix, size.min = size.min, 
+    out[[t1]] = Enrichment_KS_gene(madata = madata, label = testlabel,
+                                   censoring = censoring, DB.matrix = DB.matrix, size.min = size.min,
                                    size.max = size.max, nperm = nperm, resp.type = resp.type)
   }
   set.common = rownames(out[[1]]$pvalue.set.0)
   for (t1 in 2:length(study)) {
     set.common = intersect(set.common, rownames(out[[t1]]$pvalue.set.0))
   }
-  if (is.null(names(study))) 
+  if (is.null(names(study)))
     names(study) = paste("study.", 1:length(study), sep = "")
-  pvalue.B.array = array(data = NA, dim = c(length(set.common), 
+  pvalue.B.array = array(data = NA, dim = c(length(set.common),
                                             nperm, length(study)))
-  dimnames(pvalue.B.array) = list(set.common, paste("perm", 
+  dimnames(pvalue.B.array) = list(set.common, paste("perm",
                                                     1:nperm, sep = ""), names(study))
   pvalue.0.mtx = matrix(NA, length(set.common), length(study))
   qvalue.0.mtx = matrix(NA, length(set.common), length(study))
@@ -799,10 +821,10 @@ MAPE_P_gene_KS = function (study, label, censoring.status, DB.matrix, size.min =
   }
   else if (stat == "Fisher") {
     DF = 2 * length(study)
-    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) pchisq(-2 * 
+    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) pchisq(-2 *
                                                                 sum(log(x)), DF, lower.tail = T)))
     rownames(P.0) = rownames(qvalue.0.mtx)
-    P.B = apply(pvalue.B.array, c(1, 2), function(x) pchisq(-2 * 
+    P.B = apply(pvalue.B.array, c(1, 2), function(x) pchisq(-2 *
                                                               sum(log(x)), DF, lower.tail = T))
     rownames(P.B) = rownames(qvalue.0.mtx)
   }
@@ -810,22 +832,22 @@ MAPE_P_gene_KS = function (study, label, censoring.status, DB.matrix, size.min =
     stop("Please check: the selection of stat should be one of the following options: maxP,minP,rth and Fisher")
   }
   meta.out = pqvalues.compute(P.0, P.B, Stat.type = "Pvalue")
-  return(list(pvalue.meta = meta.out$pvalue.0, qvalue.meta = meta.out$qvalue.0, 
-              pvalue.meta.B = meta.out$pvalue.B, qvalue.set.study = qvalue.0.mtx, 
+  return(list(pvalue.meta = meta.out$pvalue.0, qvalue.meta = meta.out$qvalue.0,
+              pvalue.meta.B = meta.out$pvalue.B, qvalue.set.study = qvalue.0.mtx,
               pvalue.set.study = pvalue.0.mtx))
 }
 
 
 ########################
-MAPE_G_gene_KS = function (study, label, censoring.status, DB.matrix, size.min = 15, 
-                           size.max = 500, nperm = 500, stat = NULL, rth.value = NULL, 
-                           resp.type) 
+MAPE_G_gene_KS = function (study, label, censoring.status, DB.matrix, size.min = 15,
+                           size.max = 500, nperm = 500, stat = NULL, rth.value = NULL,
+                           resp.type)
 {
   gene.common = featureNames(study[[1]])
   for (t1 in 2:length(study)) {
     gene.common = intersect(gene.common, featureNames(study[[t1]]))
   }
-  if (is.null(names(study))) 
+  if (is.null(names(study)))
     names(study) = paste("study.", 1:length(study), sep = "")
   madata = list()
   for (t1 in 1:length(study)) {
@@ -838,11 +860,11 @@ MAPE_G_gene_KS = function (study, label, censoring.status, DB.matrix, size.min =
     x = exprs(madata[[t1]])
     testlabel = madata[[t1]][[label]]
     if (resp.type == "twoclass") {
-      Tstat.perm[[t1]] = Tperm.sample(x = x, fac = as.factor(testlabel), 
+      Tstat.perm[[t1]] = Tperm.sample(x = x, fac = as.factor(testlabel),
                                       nperm = nperm)
     }
     else if (resp.type == "multiclass") {
-      Tstat.perm[[t1]] = F.perm.sample(x = x, fac = as.factor(testlabel), 
+      Tstat.perm[[t1]] = F.perm.sample(x = x, fac = as.factor(testlabel),
                                        nperm = nperm)
     }
     else if (resp.type == "survival") {
@@ -850,22 +872,22 @@ MAPE_G_gene_KS = function (study, label, censoring.status, DB.matrix, size.min =
         stop("Error: censoring.status is null")
       }
       censoring = madata[[t1]][[censoring.status]]
-      Tstat.perm[[t1]] = cox.perm.sample(expr = x, testgroup = testlabel, 
+      Tstat.perm[[t1]] = cox.perm.sample(expr = x, testgroup = testlabel,
                                          censoring = censoring, nperm = nperm)
     }
     else if (resp.type == "continuous") {
-      Tstat.perm[[t1]] = reg.perm.sample(expr = x, testgroup = testlabel, 
+      Tstat.perm[[t1]] = reg.perm.sample(expr = x, testgroup = testlabel,
                                          nperm = nperm)
     }
     else {
       stop("Error: Wrong input augument for resp.type")
     }
     out[[t1]] = list()
-    out[[t1]] = pqvalues.compute(Tstat.perm[[t1]]$obs, Tstat.perm[[t1]]$perms, 
+    out[[t1]] = pqvalues.compute(Tstat.perm[[t1]]$obs, Tstat.perm[[t1]]$perms,
                                  Stat.type = "Tstat")
   }
   pvalue.B.array = array(data = NA, dim = c(length(gene.common), nperm, length(study)))
-  dimnames(pvalue.B.array) = list(gene.common, paste("perm", 
+  dimnames(pvalue.B.array) = list(gene.common, paste("perm",
                                                      1:nperm, sep = ""), names(study))
   pvalue.0.mtx = matrix(NA, length(gene.common), length(study))
   qvalue.0.mtx = matrix(NA, length(gene.common), length(study))
@@ -897,10 +919,10 @@ MAPE_G_gene_KS = function (study, label, censoring.status, DB.matrix, size.min =
   }
   else if (stat == "Fisher") {
     DF = 2 * length(study)
-    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) pchisq(-2 * 
+    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) pchisq(-2 *
                                                                 sum(log(x)), DF, lower.tail = T)))
     rownames(P.0) = rownames(qvalue.0.mtx)
-    P.B = apply(pvalue.B.array, c(1, 2), function(x) pchisq(-2 * 
+    P.B = apply(pvalue.B.array, c(1, 2), function(x) pchisq(-2 *
                                                               sum(log(x)), DF, lower.tail = T))
     rownames(P.B) = rownames(qvalue.0.mtx)
   }
@@ -912,25 +934,25 @@ MAPE_G_gene_KS = function (study, label, censoring.status, DB.matrix, size.min =
   names(gene.qvalues) = rownames(meta.out$qvalue.0)
   gene.pvalues = as.vector(meta.out$pvalue.0)
   names(gene.pvalues) = rownames(meta.out$pvalue.0)
-  meta.set = Enrichment_KS_gene(madata = NULL, label = NULL, 
-                                DB.matrix = DB.matrix, size.min = size.min, size.max = size.max, 
+  meta.set = Enrichment_KS_gene(madata = NULL, label = NULL,
+                                DB.matrix = DB.matrix, size.min = size.min, size.max = size.max,
                                 nperm = nperm, gene.pvalues = gene.qvalues)
-  return(list(pvalue.meta = meta.set$pvalue.set.0, qvalue.meta = meta.set$qvalue.set.0, 
-              pvalue.meta.B = meta.set$pvalue.set.B, gene.meta.qvalues = gene.qvalues, 
-              gene.meta.pvalues = gene.pvalues, gene.study.qvalues = qvalue.0.mtx, 
+  return(list(pvalue.meta = meta.set$pvalue.set.0, qvalue.meta = meta.set$qvalue.set.0,
+              pvalue.meta.B = meta.set$pvalue.set.B, gene.meta.qvalues = gene.qvalues,
+              gene.meta.pvalues = gene.pvalues, gene.study.qvalues = qvalue.0.mtx,
               gene.study.pvalues = pvalue.0.mtx))
 }
 
 
 ######################
-MAPE_G_sample_KS = function (study, label, censoring.status = NULL, DB.matrix, size.min = 15, 
-                             size.max = 500, nperm = 500, stat, rth.value = NULL, resp.type) 
+MAPE_G_sample_KS = function (study, label, censoring.status = NULL, DB.matrix, size.min = 15,
+                             size.max = 500, nperm = 500, stat, rth.value = NULL, resp.type)
 {
   gene.common = featureNames(study[[1]])
   for (t1 in 2:length(study)) {
     gene.common = intersect(gene.common, featureNames(study[[t1]]))
   }
-  if (is.null(names(study))) 
+  if (is.null(names(study)))
     names(study) = paste("study.", 1:length(study), sep = "")
   madata = list()
   for (t1 in 1:length(study)) {
@@ -943,11 +965,11 @@ MAPE_G_sample_KS = function (study, label, censoring.status = NULL, DB.matrix, s
     x = exprs(madata[[t1]])
     testlabel = madata[[t1]][[label]]
     if (resp.type == "twoclass") {
-      Tstat.perm[[t1]] = Tperm.sample(x = x, fac = as.factor(testlabel), 
+      Tstat.perm[[t1]] = Tperm.sample(x = x, fac = as.factor(testlabel),
                                       nperm = nperm)
     }
     else if (resp.type == "multiclass") {
-      Tstat.perm[[t1]] = F.perm.sample(x = x, fac = as.factor(testlabel), 
+      Tstat.perm[[t1]] = F.perm.sample(x = x, fac = as.factor(testlabel),
                                        nperm = nperm)
     }
     else if (resp.type == "survival") {
@@ -955,23 +977,23 @@ MAPE_G_sample_KS = function (study, label, censoring.status = NULL, DB.matrix, s
         stop("Error: censoring.aus is null")
       }
       censoring = madata[[t1]][[censoring.status]]
-      Tstat.perm[[t1]] = cox.perm.sample(expr = x, testgroup = testlabel, 
+      Tstat.perm[[t1]] = cox.perm.sample(expr = x, testgroup = testlabel,
                                          censoring = censoring, nperm = nperm)
     }
     else if (resp.type == "continuous") {
-      Tstat.perm[[t1]] = reg.perm.sample(expr = x, testgroup = testlabel, 
+      Tstat.perm[[t1]] = reg.perm.sample(expr = x, testgroup = testlabel,
                                          nperm = nperm)
     }
     else {
       stop("Error: Wrong input augument for resp.type")
     }
     out[[t1]] = list()
-    out[[t1]] = pqvalues.compute(Tstat.perm[[t1]]$obs, Tstat.perm[[t1]]$perms, 
+    out[[t1]] = pqvalues.compute(Tstat.perm[[t1]]$obs, Tstat.perm[[t1]]$perms,
                                  Stat.type = "Tstat")
   }
-  pvalue.B.array = array(data = NA, dim = c(length(gene.common), 
+  pvalue.B.array = array(data = NA, dim = c(length(gene.common),
                                             nperm, length(study)))
-  dimnames(pvalue.B.array) = list(gene.common, paste("perm", 
+  dimnames(pvalue.B.array) = list(gene.common, paste("perm",
                                                      1:nperm, sep = ""), names(study))
   pvalue.0.mtx = matrix(NA, length(gene.common), length(study))
   qvalue.0.mtx = matrix(NA, length(gene.common), length(study))
@@ -1003,10 +1025,10 @@ MAPE_G_sample_KS = function (study, label, censoring.status = NULL, DB.matrix, s
   }
   else if (stat == "Fisher") {
     DF = 2 * length(study)
-    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) pchisq(-2 * 
+    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) pchisq(-2 *
                                                                 sum(log(x)), DF, lower.tail = T)))
     rownames(P.0) = rownames(qvalue.0.mtx)
-    P.B = apply(pvalue.B.array, c(1, 2), function(x) pchisq(-2 * 
+    P.B = apply(pvalue.B.array, c(1, 2), function(x) pchisq(-2 *
                                                               sum(log(x)), DF, lower.tail = T))
     rownames(P.B) = rownames(qvalue.0.mtx)
   }
@@ -1044,7 +1066,7 @@ MAPE_G_sample_KS = function (study, label, censoring.status = NULL, DB.matrix, s
   order.mtx.1 = t(apply(order.mtx.1, 1, function(x) x/sum(x)))
   order.mtx.0 = -t(apply(order.mtx.0, 1, function(x) x/sum(x)))
   order.mtx = order.mtx.0 + order.mtx.1
-  ES.0 = as.matrix(apply(t(apply(order.mtx, 1, cumsum)), 1, 
+  ES.0 = as.matrix(apply(t(apply(order.mtx, 1, cumsum)), 1,
                          max))
   ES.B = matrix(NA, nrow(ES.0), ncol(score.B))
   for (t1 in 1:ncol(score.B)) {
@@ -1066,18 +1088,18 @@ MAPE_G_sample_KS = function (study, label, censoring.status = NULL, DB.matrix, s
   enrich.out = pqvalues.compute(ES.pval.0, ES.pval.B, Stat.type = "Pvalue")
   colnames(enrich.out$pvalue.0) = "MAPE_G_sample"
   colnames(enrich.out$qvalue.0) = "MAPE_G_sample"
-  colnames(enrich.out$pvalue.B) = paste("perm", 1:ncol(enrich.out$pvalue.B), 
+  colnames(enrich.out$pvalue.B) = paste("perm", 1:ncol(enrich.out$pvalue.B),
                                         sep = "")
-  return(list(pvalue.meta = enrich.out$pvalue.0, qvalue.meta = enrich.out$qvalue.0, 
+  return(list(pvalue.meta = enrich.out$pvalue.0, qvalue.meta = enrich.out$qvalue.0,
               pvalue.meta.B = enrich.out$pvalue.B))
 }
 
 
 #######################
-MAPE_P_sample_KS <- function (study, label, censoring.status = NULL, DB.matrix, size.min = 15, 
-                              size.max = 500, nperm = 500, stat, rth.value = NULL, resp.type) 
+MAPE_P_sample_KS <- function (study, label, censoring.status = NULL, DB.matrix, size.min = 15,
+                              size.max = 500, nperm = 500, stat, rth.value = NULL, resp.type)
 {
-  if (is.null(names(study))) 
+  if (is.null(names(study)))
     names(study) = paste("study.", 1:length(study), sep = "")
   out = list()
   for (t1 in 1:length(study)) {
@@ -1087,15 +1109,15 @@ MAPE_P_sample_KS <- function (study, label, censoring.status = NULL, DB.matrix, 
     if (resp.type == "survival") {
       censoring = madata[[censoring.status]]
     }
-    out[[t1]] = Enrichment_KS_sample(madata = madata, label = testlabel, 
-                                     censoring = censoring, DB.matrix = DB.matrix, size.min = size.min, 
+    out[[t1]] = Enrichment_KS_sample(madata = madata, label = testlabel,
+                                     censoring = censoring, DB.matrix = DB.matrix, size.min = size.min,
                                      size.max = size.max, nperm = nperm, resp.type = resp.type)
   }
   common.pathway = rownames(out[[1]]$pvalue.set.0)
   for (t1 in 1:length(study)) {
     common.pathway = intersect(common.pathway, rownames(out[[t1]]$pvalue.set.0))
   }
-  pvalue.B.array = array(data = NA, dim = c(length(common.pathway), 
+  pvalue.B.array = array(data = NA, dim = c(length(common.pathway),
                                             nperm, length(study)))
   pvalue.0.mtx = matrix(NA, length(common.pathway), length(study))
   qvalue.0.mtx = matrix(NA, length(common.pathway), length(study))
@@ -1103,14 +1125,14 @@ MAPE_P_sample_KS <- function (study, label, censoring.status = NULL, DB.matrix, 
   colnames(pvalue.0.mtx) = names(study)
   rownames(qvalue.0.mtx) = common.pathway
   colnames(qvalue.0.mtx) = names(study)
-  dimnames(pvalue.B.array) = list(common.pathway, paste("perm", 
+  dimnames(pvalue.B.array) = list(common.pathway, paste("perm",
                                                         1:nperm, sep = ""), names(study))
   for (t1 in 1:length(study)) {
-    pvalue.B.array[, , t1] = out[[t1]]$pvalue.set.B[common.pathway, 
+    pvalue.B.array[, , t1] = out[[t1]]$pvalue.set.B[common.pathway,
                                                     ]
-    pvalue.0.mtx[, t1] = out[[t1]]$pvalue.set.0[common.pathway, 
+    pvalue.0.mtx[, t1] = out[[t1]]$pvalue.set.0[common.pathway,
                                                 ]
-    qvalue.0.mtx[, t1] = out[[t1]]$qvalue.set.0[common.pathway, 
+    qvalue.0.mtx[, t1] = out[[t1]]$qvalue.set.0[common.pathway,
                                                 ]
   }
   if (stat == "maxP") {
@@ -1133,10 +1155,10 @@ MAPE_P_sample_KS <- function (study, label, censoring.status = NULL, DB.matrix, 
   }
   else if (stat == "Fisher") {
     DF = 2 * length(study)
-    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) pchisq(-2 * 
+    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) pchisq(-2 *
                                                                 sum(log(x)), DF, lower.tail = T)))
     rownames(P.0) = rownames(pvalue.0.mtx)
-    P.B = apply(pvalue.B.array, c(1, 2), function(x) pchisq(-2 * 
+    P.B = apply(pvalue.B.array, c(1, 2), function(x) pchisq(-2 *
                                                               sum(log(x)), DF, lower.tail = T))
     rownames(P.B) = rownames(pvalue.0.mtx)
   }
@@ -1148,21 +1170,21 @@ MAPE_P_sample_KS <- function (study, label, censoring.status = NULL, DB.matrix, 
   meta.out = pqvalues.compute(P.0, P.B, Stat.type = "Pvalue")
   colnames(meta.out$pvalue.0) = "MAPE_P_sample"
   colnames(meta.out$qvalue.0) = "MAPE_P_sample"
-  return(list(pvalue.meta = meta.out$pvalue.0, qvalue.meta = meta.out$qvalue.0, 
-              pvalue.meta.B = meta.out$pvalue.B, pvalue.set.study = pvalue.0.mtx, 
+  return(list(pvalue.meta = meta.out$pvalue.0, qvalue.meta = meta.out$qvalue.0,
+              pvalue.meta.B = meta.out$pvalue.B, pvalue.set.study = pvalue.0.mtx,
               qvalue.set.study = qvalue.0.mtx))
 }
 
 
 ######################
-MAPE_I_KS <- function (MAP_GENE.obj, MAP_SET.obj) 
+MAPE_I_KS <- function (MAP_GENE.obj, MAP_SET.obj)
 {
-  set.common = intersect(rownames(MAP_GENE.obj$pvalue.meta), 
+  set.common = intersect(rownames(MAP_GENE.obj$pvalue.meta),
                          rownames(MAP_SET.obj$pvalue.meta))
   nperm = ncol(MAP_SET.obj$pvalue.meta.B)
-  pvalue.set.B.array = array(data = NA, dim = c(length(set.common), 
+  pvalue.set.B.array = array(data = NA, dim = c(length(set.common),
                                                 nperm, 2))
-  dimnames(pvalue.set.B.array) = list(set.common, paste("perm", 
+  dimnames(pvalue.set.B.array) = list(set.common, paste("perm",
                                                         1:nperm, sep = ""), c(1,2))
   pvalue.set.0.mtx = matrix(NA, length(set.common), 2)
   pvalue.set.B.array[, , 1] = MAP_SET.obj$pvalue.meta.B[set.common,]
@@ -1180,11 +1202,11 @@ MAPE_I_KS <- function (MAP_GENE.obj, MAP_SET.obj)
 
 
 ########################
-MAPE_I <- function (MAP_GENE.obj, MAP_SET.obj) 
+MAPE_I <- function (MAP_GENE.obj, MAP_SET.obj)
 {
-  set.common = intersect(rownames(MAP_GENE.obj$qvalue.meta), 
+  set.common = intersect(rownames(MAP_GENE.obj$qvalue.meta),
                          rownames(MAP_SET.obj$qvalue.meta))
-  
+
   pvalue.set.0.mtx = matrix(NA, length(set.common), 2)
   pvalue.set.0.mtx[, 1] = MAP_SET.obj$pvalue.meta[set.common,]
   pvalue.set.0.mtx[, 2] = MAP_GENE.obj$pvalue.meta[set.common,]
@@ -1202,8 +1224,8 @@ MAPE_I <- function (MAP_GENE.obj, MAP_SET.obj)
 
 
 ########################
-Enrichment_KS_gene <- function (madata, label, censoring = NULL, DB.matrix, size.min = 15, 
-                                size.max = 500, nperm = 500, gene.pvalues = NULL, resp.type = NULL) 
+Enrichment_KS_gene <- function (madata, label, censoring = NULL, DB.matrix, size.min = 15,
+                                size.max = 500, nperm = 500, gene.pvalues = NULL, resp.type = NULL)
 {
   if (!is.null(madata)) {
     genes.in.study = featureNames(madata)
@@ -1213,19 +1235,19 @@ Enrichment_KS_gene <- function (madata, label, censoring = NULL, DB.matrix, size
       set2allgenes.mtx = as.matrix(set2allgenes.mtx[, gene.common])
     }
     else {
-      set2allgenes.mtx = t(as.matrix(set2allgenes.mtx[, 
+      set2allgenes.mtx = t(as.matrix(set2allgenes.mtx[,
                                                       gene.common]))
     }
     madata = madata[gene.common, ]
     if (resp.type == "twoclass") {
-      tstat = genefilter::rowttests(exprs(madata), as.factor(label), 
+      tstat = genefilter::rowttests(exprs(madata), as.factor(label),
                                     tstatOnly = F)
       p.values = (tstat$p.value)
       names(p.values) = rownames(tstat)
       gene.name.sort = names(sort(p.values, decreasing = F))
     }
     else if (resp.type == "multiclass") {
-      tstat = genefilter::rowFtests(exprs(madata), as.factor(label), 
+      tstat = genefilter::rowFtests(exprs(madata), as.factor(label),
                                     var.equal = TRUE)
       p.values = (tstat$p.value)
       names(p.values) = rownames(tstat)
@@ -1249,7 +1271,7 @@ Enrichment_KS_gene <- function (madata, label, censoring = NULL, DB.matrix, size
     }
   }
   if (!is.null(gene.pvalues)) {
-    if ((!is.vector(gene.pvalues)) | (is.null(names(gene.pvalues)))) 
+    if ((!is.vector(gene.pvalues)) | (is.null(names(gene.pvalues))))
       stop("gene.pvalues should be a vector with gene names")
     genes.in.study = names(gene.pvalues)
     set2allgenes.mtx = DB.matrix
@@ -1258,7 +1280,7 @@ Enrichment_KS_gene <- function (madata, label, censoring = NULL, DB.matrix, size
       set2allgenes.mtx = as.matrix(set2allgenes.mtx[, gene.common])
     }
     else {
-      set2allgenes.mtx = t(as.matrix(set2allgenes.mtx[, 
+      set2allgenes.mtx = t(as.matrix(set2allgenes.mtx[,
                                                       gene.common]))
     }
     gene.pvalues = gene.pvalues[gene.common]
@@ -1268,16 +1290,16 @@ Enrichment_KS_gene <- function (madata, label, censoring = NULL, DB.matrix, size
   idx.1 = which(set.length >= size.min)
   idx.2 = which(set.length <= size.max)
   set.idx = intersect(idx.1, idx.2)
-  if (length(set.idx) < 1) 
+  if (length(set.idx) < 1)
     stop("no gene sets satisfying size.min<=size<=size.max")
   if (length(set.idx) > 1) {
     set2allgenes.mtx = set2allgenes.mtx[set.idx, ]
   }
   else {
-    set2allgenes.mtx = t(as.matrix(set2allgenes.mtx[set.idx, 
+    set2allgenes.mtx = t(as.matrix(set2allgenes.mtx[set.idx,
                                                     ]))
   }
-  
+
   if (nrow(set2allgenes.mtx) > 1) {
     order.mtx.1 = (set2allgenes.mtx[, gene.name.sort])
   }
@@ -1288,7 +1310,7 @@ Enrichment_KS_gene <- function (madata, label, censoring = NULL, DB.matrix, size
   order.mtx.1 = t(apply(order.mtx.1, 1, function(x) x/sum(x)))
   order.mtx.0 = -t(apply(order.mtx.0, 1, function(x) x/sum(x)))
   order.mtx = order.mtx.0 + order.mtx.1
-  ES.0 = as.matrix(apply(t(apply(order.mtx, 1, cumsum)), 1, 
+  ES.0 = as.matrix(apply(t(apply(order.mtx, 1, cumsum)), 1,
                          max))
   ES.B = matrix(NA, nrow(ES.0), nperm)
   for (t1 in 1:nperm) {
@@ -1306,19 +1328,19 @@ Enrichment_KS_gene <- function (madata, label, censoring = NULL, DB.matrix, size
   N.Y = ncol(set2allgenes.mtx) - N.X
   N = N.X * N.Y/(N.X + N.Y)
   enrich.out = pqvalues.compute(ES.0, ES.B, Stat.type = "Tstat")
-  return(list(pvalue.set.0 = enrich.out$pvalue.0, pvalue.set.B = enrich.out$pvalue.B, 
+  return(list(pvalue.set.0 = enrich.out$pvalue.0, pvalue.set.B = enrich.out$pvalue.B,
               qvalue.set.0 = enrich.out$qvalue.0))
 }
 
 
 ######################
-Enrichment_KS_sample <- function (madata, label, censoring = NULL, DB.matrix, size.min = 15, 
-                                  size.max = 500, nperm = 500, resp.type = NULL) 
+Enrichment_KS_sample <- function (madata, label, censoring = NULL, DB.matrix, size.min = 15,
+                                  size.max = 500, nperm = 500, resp.type = NULL)
 {
   genes.in.study = featureNames(madata)
   set2allgenes.mtx = DB.matrix
   gene.common = intersect(featureNames(madata), colnames(set2allgenes.mtx))
-  set2allgenes.mtx = as.matrix(set2allgenes.mtx[, gene.common], 
+  set2allgenes.mtx = as.matrix(set2allgenes.mtx[, gene.common],
                                drop = F)
   madata = madata[gene.common, ]
   set.length = apply(set2allgenes.mtx, 1, sum)
@@ -1334,22 +1356,22 @@ Enrichment_KS_sample <- function (madata, label, censoring = NULL, DB.matrix, si
   x = exprs(madata)
   testlabel = label
   if (resp.type == "twoclass") {
-    Tstat.perm = Tperm.sample(x = x, fac = as.factor(testlabel), 
+    Tstat.perm = Tperm.sample(x = x, fac = as.factor(testlabel),
                               nperm = nperm)
   }
   else if (resp.type == "multiclass") {
-    Tstat.perm = F.perm.sample(x = x, fac = as.factor(testlabel), 
+    Tstat.perm = F.perm.sample(x = x, fac = as.factor(testlabel),
                                nperm = nperm)
   }
   else if (resp.type == "survival") {
     if (is.null(censoring)) {
       stop("Error: censoring.status is null")
     }
-    Tstat.perm = cox.perm.sample(expr = x, testgroup = testlabel, 
+    Tstat.perm = cox.perm.sample(expr = x, testgroup = testlabel,
                                  censoring = censoring, nperm = nperm)
   }
   else if (resp.type == "continuous") {
-    Tstat.perm = reg.perm.sample(expr = x, testgroup = testlabel, 
+    Tstat.perm = reg.perm.sample(expr = x, testgroup = testlabel,
                                  nperm = nperm)
   }
   else {
@@ -1363,7 +1385,7 @@ Enrichment_KS_sample <- function (madata, label, censoring = NULL, DB.matrix, si
   order.mtx.1 = t(apply(order.mtx.1, 1, function(x) x/sum(x)))
   order.mtx.0 = -t(apply(order.mtx.0, 1, function(x) x/sum(x)))
   order.mtx = order.mtx.0 + order.mtx.1
-  ES.0 = as.matrix(apply(t(apply(order.mtx, 1, cumsum)), 1, 
+  ES.0 = as.matrix(apply(t(apply(order.mtx, 1, cumsum)), 1,
                          max))
   ES.B = matrix(NA, nrow(ES.0), ncol(score.B))
   for (t1 in 1:ncol(score.B)) {
@@ -1381,14 +1403,14 @@ Enrichment_KS_sample <- function (madata, label, censoring = NULL, DB.matrix, si
   N.Y = ncol(set2allgenes.mtx) - N.X
   N = N.X * N.Y/(N.X + N.Y)
   enrich.out = pqvalues.compute(ES.0, ES.B, Stat.type = "Tstat")
-  return(list(pvalue.set.0 = enrich.out$pvalue.0, pvalue.set.B = enrich.out$pvalue.B, 
+  return(list(pvalue.set.0 = enrich.out$pvalue.0, pvalue.set.B = enrich.out$pvalue.B,
               qvalue.set.0 = enrich.out$qvalue.0))
 }
 
 
 ######################
-Enrichment_KS <- function (madata, label, censoring = NULL, DB.matrix, size.min = 15, 
-                                size.max = 500, gene.pvalues = NULL, resp.type = NULL) 
+Enrichment_KS <- function (madata, label, censoring = NULL, DB.matrix, size.min = 15,
+                           size.max = 500, gene.pvalues = NULL, resp.type = NULL)
 {
   if (!is.null(madata)) {
     genes.in.study = featureNames(madata)
@@ -1398,19 +1420,19 @@ Enrichment_KS <- function (madata, label, censoring = NULL, DB.matrix, size.min 
       set2allgenes.mtx = as.matrix(set2allgenes.mtx[, gene.common])
     }
     else {
-      set2allgenes.mtx = t(as.matrix(set2allgenes.mtx[, 
+      set2allgenes.mtx = t(as.matrix(set2allgenes.mtx[,
                                                       gene.common]))
     }
     madata = madata[gene.common, ]
     if (resp.type == "twoclass") {
-      tstat = genefilter::rowttests(exprs(madata), as.factor(label), 
+      tstat = genefilter::rowttests(exprs(madata), as.factor(label),
                                     tstatOnly = F)
       p.values = (tstat$p.value)
       names(p.values) = rownames(tstat)
       gene.name.sort = names(sort(p.values, decreasing = F))
     }
     else if (resp.type == "multiclass") {
-      tstat = genefilter::rowFtests(exprs(madata), as.factor(label), 
+      tstat = genefilter::rowFtests(exprs(madata), as.factor(label),
                                     var.equal = TRUE)
       p.values = (tstat$p.value)
       names(p.values) = rownames(tstat)
@@ -1434,7 +1456,7 @@ Enrichment_KS <- function (madata, label, censoring = NULL, DB.matrix, size.min 
     }
   }
   if (!is.null(gene.pvalues)) {
-    if ((!is.vector(gene.pvalues)) | (is.null(names(gene.pvalues)))) 
+    if ((!is.vector(gene.pvalues)) | (is.null(names(gene.pvalues))))
       stop("gene.pvalues should be a vector with gene names")
     genes.in.study = names(gene.pvalues)
     set2allgenes.mtx = DB.matrix
@@ -1443,7 +1465,7 @@ Enrichment_KS <- function (madata, label, censoring = NULL, DB.matrix, size.min 
       set2allgenes.mtx = as.matrix(set2allgenes.mtx[, gene.common])
     }
     else {
-      set2allgenes.mtx = t(as.matrix(set2allgenes.mtx[, 
+      set2allgenes.mtx = t(as.matrix(set2allgenes.mtx[,
                                                       gene.common]))
     }
     gene.pvalues = gene.pvalues[gene.common]
@@ -1453,13 +1475,13 @@ Enrichment_KS <- function (madata, label, censoring = NULL, DB.matrix, size.min 
   idx.1 = which(set.length >= size.min)
   idx.2 = which(set.length <= size.max)
   set.idx = intersect(idx.1, idx.2)
-  if (length(set.idx) < 1) 
+  if (length(set.idx) < 1)
     stop("no gene sets satisfying size.min<=size<=size.max")
   if (length(set.idx) > 1) {
     set2allgenes.mtx = set2allgenes.mtx[set.idx, ]
   }
   else {
-    set2allgenes.mtx = t(as.matrix(set2allgenes.mtx[set.idx, 
+    set2allgenes.mtx = t(as.matrix(set2allgenes.mtx[set.idx,
                                                     ]))
   }
   if (nrow(set2allgenes.mtx) > 1) {
@@ -1476,7 +1498,7 @@ Enrichment_KS <- function (madata, label, censoring = NULL, DB.matrix, size.min 
   order.mtx.1 = t(apply(order.mtx.1, 1, function(x) x/sum(x)))
   order.mtx.0 = -t(apply(order.mtx.0, 1, function(x) x/sum(x)))
   order.mtx = order.mtx.0 + order.mtx.1
-  ES.0 = as.matrix(apply(t(apply(order.mtx, 1, cumsum)), 1, 
+  ES.0 = as.matrix(apply(t(apply(order.mtx, 1, cumsum)), 1,
                          max))
   pvalue.0 = matrix(exp(-2*nn*(ES.0[,1]^2)), ncol = 1)
   qvalue.0 = matrix(p.adjust(pvalue.0[,1],"BH"), ncol = 1)
@@ -1488,11 +1510,11 @@ Enrichment_KS <- function (madata, label, censoring = NULL, DB.matrix, size.min 
 
 
 ##########################
-MAPE_P_KS = function (study, label, censoring.status, DB.matrix, size.min = 15, 
-                           size.max = 500, stat = NULL, rth.value = NULL, 
-                           resp.type) 
+MAPE_P_KS = function (study, label, censoring.status, DB.matrix, size.min = 15,
+                      size.max = 500, stat = NULL, rth.value = NULL,
+                      resp.type)
 {
-  if (is.null(names(study))) 
+  if (is.null(names(study)))
     names(study) = paste("study.", 1:length(study), sep = "")
   out = list()
   for (t1 in 1:length(study)) {
@@ -1502,15 +1524,15 @@ MAPE_P_KS = function (study, label, censoring.status, DB.matrix, size.min = 15,
     if (resp.type == "survival") {
       censoring = madata[[censoring.status]]
     }
-    out[[t1]] = Enrichment_KS (madata = madata, label = testlabel, 
-                               censoring = censoring, DB.matrix = DB.matrix, size.min = size.min, 
+    out[[t1]] = Enrichment_KS (madata = madata, label = testlabel,
+                               censoring = censoring, DB.matrix = DB.matrix, size.min = size.min,
                                size.max = size.max, resp.type = resp.type)
   }
   set.common = rownames(out[[1]]$pvalue.set.0)
   for (t1 in 2:length(study)) {
     set.common = intersect(set.common, rownames(out[[t1]]$pvalue.set.0))
   }
-  if (is.null(names(study))) 
+  if (is.null(names(study)))
     names(study) = paste("study.", 1:length(study), sep = "")
   pvalue.0.mtx = matrix(NA, length(set.common), length(study))
   qvalue.0.mtx = matrix(NA, length(set.common), length(study))
@@ -1526,7 +1548,7 @@ MAPE_P_KS = function (study, label, censoring.status, DB.matrix, size.min = 15,
     n = ncol(pvalue.0.mtx)
     pvalue.meta = pbeta(P.0,n,1)
     qvalue.meta = p.adjust(pvalue.meta,"BH")
-    }
+  }
   else if (stat == "minP") {
     P.0 = as.matrix(apply(pvalue.0.mtx, 1, min))
     n = ncol(pvalue.0.mtx)
@@ -1538,7 +1560,7 @@ MAPE_P_KS = function (study, label, censoring.status, DB.matrix, size.min = 15,
     n = ncol(pvalue.0.mtx)
     pvalue.meta = pbeta(P.0,rth.value,(n - rth.value + 1))
     qvalue.meta = p.adjust(pvalue.meta,"BH")
-    }
+  }
   else if (stat == "Fisher") {
     DF = 2 * length(study)
     P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) (-2 * sum(log(x)))))
@@ -1547,7 +1569,9 @@ MAPE_P_KS = function (study, label, censoring.status, DB.matrix, size.min = 15,
     qvalue.meta = p.adjust(pvalue.meta,"BH")
   }
   else if (stat == "AW Fisher") {
-    pvalue.meta = matrix(aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)$pvalues,ncol = 1)
+    AW.fisher = aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)
+    pvalue.meta = matrix(AW.fisher$pvalues,ncol = 1)
+    weights.meta = AW.fisher$weights
     rownames(pvalue.meta) = set.common
     qvalue.meta = p.adjust(pvalue.meta, "BH")
   }
@@ -1556,22 +1580,28 @@ MAPE_P_KS = function (study, label, censoring.status, DB.matrix, size.min = 15,
   }
   qvalue.meta = matrix(qvalue.meta,ncol = 1)
   rownames(qvalue.meta) = rownames(pvalue.meta)
-  return(list(pvalue.meta = pvalue.meta, qvalue.meta = qvalue.meta, 
-              qvalue.set.study = qvalue.0.mtx, pvalue.set.study = pvalue.0.mtx))
+
+  if(stat == "AW Fisher"){
+    return(list(pvalue.meta = pvalue.meta, qvalue.meta = qvalue.meta,
+                qvalue.set.study = qvalue.0.mtx, pvalue.set.study = pvalue.0.mtx,AW.weights = weights.meta))
+  }else{
+    return(list(pvalue.meta = pvalue.meta, qvalue.meta = qvalue.meta,
+                qvalue.set.study = qvalue.0.mtx, pvalue.set.study = pvalue.0.mtx))
+  }
 }
 
 
 
 ##########################
-MAPE_G_KS = function (study, label, censoring.status, DB.matrix, size.min = 15, 
-                           size.max = 500, stat = NULL, rth.value = NULL, 
-                           resp.type) 
+MAPE_G_KS = function (study, label, censoring.status, DB.matrix, size.min = 15,
+                      size.max = 500, stat = NULL, rth.value = NULL,
+                      resp.type)
 {
   gene.common = featureNames(study[[1]])
   for (t1 in 2:length(study)) {
     gene.common = intersect(gene.common, featureNames(study[[t1]]))
   }
-  if (is.null(names(study))) 
+  if (is.null(names(study)))
     names(study) = paste("study.", 1:length(study), sep = "")
   madata = list()
   for (t1 in 1:length(study)) {
@@ -1584,12 +1614,12 @@ MAPE_G_KS = function (study, label, censoring.status, DB.matrix, size.min = 15,
     x = exprs(madata[[t1]])
     testlabel = madata[[t1]][[label]]
     if (resp.type == "twoclass") {
-      tstat = genefilter::rowttests(x, as.factor(testlabel), 
+      tstat = genefilter::rowttests(x, as.factor(testlabel),
                                     tstatOnly = F)
       Tstat.p[[t1]] = (tstat$p.value)
     }
     else if (resp.type == "multiclass") {
-      tstat = genefilter::rowFtests(x, as.factor(testlabel), 
+      tstat = genefilter::rowFtests(x, as.factor(testlabel),
                                     var.equal = TRUE)
       Tstat.p[[t1]] = (tstat$p.value)
     }
@@ -1598,24 +1628,24 @@ MAPE_G_KS = function (study, label, censoring.status, DB.matrix, size.min = 15,
         stop("Error: censoring.status is null")
       }
       censoring = madata[[t1]][[censoring.status]]
-      Tstat.p[[t1]] = cox.perm.sample(expr = x, testgroup = testlabel, 
-                                         censoring = censoring, nperm = 500)
+      Tstat.p[[t1]] = cox.perm.sample(expr = x, testgroup = testlabel,
+                                      censoring = censoring, nperm = 500)
     }
     else if (resp.type == "continuous") {
-      Tstat.p[[t1]] = reg.perm.sample(expr = x, testgroup = testlabel, 
-                                         nperm = 500)
+      Tstat.p[[t1]] = reg.perm.sample(expr = x, testgroup = testlabel,
+                                      nperm = 500)
     }
     else {
       stop("Error: Wrong input augument for resp.type")
     }
     out[[t1]] = list()
     if(resp.type %in% c("survival" , "continous")){
-    out[[t1]] = pqvalues.compute(Tstat.p[[t1]]$obs, Tstat.p[[t1]]$perms, 
-                                 Stat.type = "Tstat")
+      out[[t1]] = pqvalues.compute(Tstat.p[[t1]]$obs, Tstat.p[[t1]]$perms,
+                                   Stat.type = "Tstat")
     }
     else {
-    out[[t1]]$pvalue.0 = Tstat.p[[t1]]
-    out[[t1]]$qvalue.0 = p.adjust(Tstat.p[[t1]],"BH")
+      out[[t1]]$pvalue.0 = Tstat.p[[t1]]
+      out[[t1]]$qvalue.0 = p.adjust(Tstat.p[[t1]],"BH")
     }
   }
   pvalue.0.mtx = matrix(NA, length(gene.common), length(study))
@@ -1649,7 +1679,9 @@ MAPE_G_KS = function (study, label, censoring.status, DB.matrix, size.min = 15,
     pvalue.meta = pchisq(P.0,DF,lower.tail = F)
   }
   else if (stat == "AW Fisher") {
-    pvalue.meta = matrix(aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)$pvalues,ncol = 1)
+    AW.fisher = aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)
+    pvalue.meta = matrix(AW.fisher$pvalues,ncol = 1)
+    weights.meta = AW.fisher$weights
     rownames(pvalue.meta) = gene.common
   }
   else {
@@ -1658,45 +1690,52 @@ MAPE_G_KS = function (study, label, censoring.status, DB.matrix, size.min = 15,
   gene.pvalues = as.vector(pvalue.meta)
   names(gene.pvalues) = gene.common
   gene.qvalues = p.adjust(gene.pvalues,"BH")
-  meta.set = Enrichment_KS(madata = NULL, label = NULL, 
-                                DB.matrix = DB.matrix, size.min = size.min, size.max = size.max, 
-                                gene.pvalues = gene.pvalues)
-  return(list(pvalue.meta = meta.set$pvalue.set.0, qvalue.meta = meta.set$qvalue.set.0, 
-              gene.meta.qvalues = gene.qvalues, 
-              gene.meta.pvalues = gene.pvalues, gene.study.qvalues = qvalue.0.mtx, 
-              gene.study.pvalues = pvalue.0.mtx))
+  meta.set = Enrichment_KS(madata = NULL, label = NULL,
+                           DB.matrix = DB.matrix, size.min = size.min, size.max = size.max,
+                           gene.pvalues = gene.pvalues)
+  if(stat == "AW Fisher"){
+    return(list(pvalue.meta = meta.set$pvalue.set.0, qvalue.meta = meta.set$qvalue.set.0,
+                gene.meta.qvalues = gene.qvalues,
+                gene.meta.pvalues = gene.pvalues, gene.study.qvalues = qvalue.0.mtx,
+                gene.study.pvalues = pvalue.0.mtx, AW.weights = weights.meta))
+  }else{
+    return(list(pvalue.meta = meta.set$pvalue.set.0, qvalue.meta = meta.set$qvalue.set.0,
+                gene.meta.qvalues = gene.qvalues,
+                gene.meta.pvalues = gene.pvalues, gene.study.qvalues = qvalue.0.mtx,
+                gene.study.pvalues = pvalue.0.mtx))
+  }
 }
 
 
 
 ######################
 MAPE_P_KS_DE = function (ind.p = ind.p, DB.matrix, size.min = 15, gene.common,
-                      size.max = 500, stat = NULL, rth.value = NULL) 
+                         size.max = 500, stat = NULL, rth.value = NULL)
 {
   out = list()
   out2 = list()
   for (t1 in 1:ncol(ind.p)) {
-      gene.name.sort = names(sort(ind.p[,t1],decreasing = F))
-      gene.name.sort = gene.name.sort[gene.name.sort%in%gene.common]
-      gene.name.sort = toupper(gene.name.sort)
-      set2allgenes.mtx = DB.matrix
-      order.mtx.1 = (set2allgenes.mtx[, gene.name.sort])
-      order.mtx.0 = (1 - order.mtx.1)
-      n_hit = rowSums(order.mtx.1)
-      n_miss = rowSums(order.mtx.0)
-      n_genes = ncol(order.mtx.1)
-      nn = (n_hit*n_miss)/n_genes
-      order.mtx.1 = t(apply(order.mtx.1, 1, function(x) x/sum(x)))
-      order.mtx.0 = -t(apply(order.mtx.0, 1, function(x) x/sum(x)))
-      order.mtx = order.mtx.0 + order.mtx.1
-      ES.0 = as.matrix(apply(t(apply(order.mtx, 1, cumsum)), 1, 
-                             max))
-      pvalue.0 = matrix(exp(-2*nn*(ES.0[,1]^2)), ncol = 1)
-      rownames(pvalue.0) = rownames(ES.0)
-      out[[t1]] = pvalue.0 
-      out2[[t1]] = as.matrix(p.adjust(pvalue.0,"BH"),ncol = 1)
-      rownames(out2[[t1]]) = rownames(pvalue.0)
-    }
+    gene.name.sort = names(sort(ind.p[,t1],decreasing = F))
+    gene.name.sort = gene.name.sort[gene.name.sort%in%gene.common]
+    gene.name.sort = toupper(gene.name.sort)
+    set2allgenes.mtx = DB.matrix
+    order.mtx.1 = (set2allgenes.mtx[, gene.name.sort])
+    order.mtx.0 = (1 - order.mtx.1)
+    n_hit = rowSums(order.mtx.1)
+    n_miss = rowSums(order.mtx.0)
+    n_genes = ncol(order.mtx.1)
+    nn = (n_hit*n_miss)/n_genes
+    order.mtx.1 = t(apply(order.mtx.1, 1, function(x) x/sum(x)))
+    order.mtx.0 = -t(apply(order.mtx.0, 1, function(x) x/sum(x)))
+    order.mtx = order.mtx.0 + order.mtx.1
+    ES.0 = as.matrix(apply(t(apply(order.mtx, 1, cumsum)), 1,
+                           max))
+    pvalue.0 = matrix(exp(-2*nn*(ES.0[,1]^2)), ncol = 1)
+    rownames(pvalue.0) = rownames(ES.0)
+    out[[t1]] = pvalue.0
+    out2[[t1]] = as.matrix(p.adjust(pvalue.0,"BH"),ncol = 1)
+    rownames(out2[[t1]]) = rownames(pvalue.0)
+  }
   set.common = rownames(out[[1]])
   pvalue.0.mtx = matrix(NA, length(set.common), ncol(ind.p))
   qvalue.0.mtx = matrix(NA, length(set.common), ncol(ind.p))
@@ -1735,7 +1774,9 @@ MAPE_P_KS_DE = function (ind.p = ind.p, DB.matrix, size.min = 15, gene.common,
     qvalue.meta = p.adjust(pvalue.meta,"BH")
   }
   else if (stat == "AW Fisher") {
-    pvalue.meta = matrix(aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)$pvalues,ncol = 1)
+    AW.fisher = aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)
+    pvalue.meta = matrix(AW.fisher$pvalues,ncol = 1)
+    weights.meta = AW.fisher$weights
     rownames(pvalue.meta) = rownames(pvalue.0.mtx)
     qvalue.meta = p.adjust(pvalue.meta, "BH")
   }
@@ -1744,15 +1785,20 @@ MAPE_P_KS_DE = function (ind.p = ind.p, DB.matrix, size.min = 15, gene.common,
   }
   qvalue.meta = matrix(qvalue.meta,ncol = 1)
   rownames(qvalue.meta) = rownames(pvalue.meta)
-  return(list(pvalue.meta = pvalue.meta, qvalue.meta = qvalue.meta, 
-              qvalue.set.study = qvalue.0.mtx, pvalue.set.study = pvalue.0.mtx))
+  if(stat == "AW Fisher"){
+    return(list(pvalue.meta = pvalue.meta, qvalue.meta = qvalue.meta,
+                qvalue.set.study = qvalue.0.mtx, pvalue.set.study = pvalue.0.mtx,AW.weights = weights.meta))
+  }else{
+    return(list(pvalue.meta = pvalue.meta, qvalue.meta = qvalue.meta,
+                qvalue.set.study = qvalue.0.mtx, pvalue.set.study = pvalue.0.mtx))
+  }
 }
 
 
 ####################
-CPI_KS <- function (study, label, censoring.status, DB.matrix, size.min = 15, 
-                         size.max = 500, stat = NULL, rth.value = NULL, resp.type) 
-{if (is.null(names(study))) 
+CPI_KS <- function (study, label, censoring.status, DB.matrix, size.min = 15,
+                    size.max = 500, stat = NULL, rth.value = NULL, resp.type)
+{if (is.null(names(study)))
   names(study) = paste("study.", 1:length(study), sep = "")
 out = list()
 for (t1 in 1:length(study)) {
@@ -1762,15 +1808,15 @@ for (t1 in 1:length(study)) {
   if (resp.type == "survival") {
     censoring = madata[[censoring.status]]
   }
-  out[[t1]] = Enrichment_KS (madata = madata, label = testlabel, 
-                             censoring = censoring, DB.matrix = DB.matrix, size.min = size.min, 
+  out[[t1]] = Enrichment_KS (madata = madata, label = testlabel,
+                             censoring = censoring, DB.matrix = DB.matrix, size.min = size.min,
                              size.max = size.max, resp.type = resp.type)
 }
 set.common = rownames(out[[1]]$pvalue.set.0)
 for (t1 in 2:length(study)) {
   set.common = intersect(set.common, rownames(out[[t1]]$pvalue.set.0))
 }
-if (is.null(names(study))) 
+if (is.null(names(study)))
   names(study) = paste("study.", 1:length(study), sep = "")
 
 pvalue.0.mtx = matrix(NA, length(set.common), length(study))
@@ -1783,18 +1829,21 @@ rownames(qvalue.0.mtx) = set.common
 rownames(pvalue.0.mtx) = set.common
 rm(out)
 
-p_value_meta = aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)$pvalues
+AW.fisher = aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)
+p_value_meta = AW.fisher$pvalues
+weights.meta = AW.fisher$weights
+
 q_value_meta = p.adjust(p_value_meta, "BH")
 summary<-data.frame(q_value_meta = q_value_meta,p_value_meta = p_value_meta,
                     p_data = pvalue.0.mtx)
-return(list(summary = summary))
+return(list(summary = summary,AW.weights = weights.meta))
 }
 
 
 
 #########################
 MAPE_P_Exact_DE = function (ind.p = ind.p, DB.matrix, size.min = 15, gene.common,
-                         size.max = 500, stat = NULL, rth.value = NULL, DEgene.number) 
+                            size.max = 500, stat = NULL, rth.value = NULL, DEgene.number)
 {
   out = list()
   out2 = list()
@@ -1817,14 +1866,14 @@ MAPE_P_Exact_DE = function (ind.p = ind.p, DB.matrix, size.min = 15, gene.common
       ####not in the gene list but in the pathway
       count_table[2,1]<-sum(genes.in.study%in% colnames(DB.matrix[,DB.matrix[i,]==1]))
       ####not in the gene list and not in the pathway
-      count_table[2,2]<-length(genes.in.study)-count_table[2,1]       
+      count_table[2,2]<-length(genes.in.study)-count_table[2,1]
       if(length(count_table)==4){
         pvalue.0[i,1] <- fisher.test(count_table, alternative="greater")$p}
     }
-#    pvalue.0 = pvalue.0[pvalue.0[,1]!=1,,drop=FALSE]
+    #    pvalue.0 = pvalue.0[pvalue.0[,1]!=1,,drop=FALSE]
     qvalue.0 = matrix(p.adjust(pvalue.0[,1], "BH"),ncol = 1)
     rownames(qvalue.0) = rownames(pvalue.0)
-    out[[t1]] = pvalue.0 
+    out[[t1]] = pvalue.0
     out2[[t1]] = as.matrix(p.adjust(pvalue.0,"BH"),ncol = 1)
     rownames(out2[[t1]]) = rownames(pvalue.0)
     out3[[t1]] = DEgene
@@ -1866,7 +1915,9 @@ MAPE_P_Exact_DE = function (ind.p = ind.p, DB.matrix, size.min = 15, gene.common
     qvalue.meta = p.adjust(pvalue.meta,"BH")
   }
   else if (stat == "AW Fisher") {
-    pvalue.meta = matrix(aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)$pvalues,ncol = 1)
+    AW.fisher = aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)
+    pvalue.meta = matrix(AW.fisher$pvalues,ncol = 1)
+    weights.meta = AW.fisher$weights
     rownames(pvalue.meta) = set.common
     qvalue.meta = p.adjust(pvalue.meta, "BH")
   }
@@ -1879,15 +1930,20 @@ MAPE_P_Exact_DE = function (ind.p = ind.p, DB.matrix, size.min = 15, gene.common
   for (t1 in 1:ncol(ind.p)) {
     genelist[[t1]] = out3[[t1]]
   }
-  return(list(pvalue.meta = pvalue.meta, qvalue.meta = qvalue.meta, 
-              qvalue.set.study = qvalue.0.mtx, pvalue.set.study = pvalue.0.mtx,genelist = genelist))
+  if(stat=="AW Fisher"){
+    return(list(pvalue.meta = pvalue.meta, qvalue.meta = qvalue.meta,
+                qvalue.set.study = qvalue.0.mtx, pvalue.set.study = pvalue.0.mtx,genelist = genelist, AW.weights = weights.meta))
+  }else{
+    return(list(pvalue.meta = pvalue.meta, qvalue.meta = qvalue.meta,
+                qvalue.set.study = qvalue.0.mtx, pvalue.set.study = pvalue.0.mtx,genelist = genelist))
+  }
 }
 
 
 
 ##########################
 MAPE_P_KS_gene = function (ind.p = ind.p, DB.matrix, size.min = 15, gene.common,
-                         size.max = 500, stat = NULL, rth.value = NULL,nperm = nperm) 
+                           size.max = 500, stat = NULL, rth.value = NULL,nperm = nperm)
 {
   out = list()
   for (t1 in 1:ncol(ind.p)) {
@@ -1900,7 +1956,7 @@ MAPE_P_KS_gene = function (ind.p = ind.p, DB.matrix, size.min = 15, gene.common,
     order.mtx.1 = t(apply(order.mtx.1, 1, function(x) x/sum(x)))
     order.mtx.0 = -t(apply(order.mtx.0, 1, function(x) x/sum(x)))
     order.mtx = order.mtx.0 + order.mtx.1
-    ES.0 = as.matrix(apply(t(apply(order.mtx, 1, cumsum)), 1, 
+    ES.0 = as.matrix(apply(t(apply(order.mtx, 1, cumsum)), 1,
                            max))
     ES.B = matrix(NA, nrow(ES.0), nperm)
     for (i in 1:nperm) {
@@ -1927,9 +1983,9 @@ MAPE_P_KS_gene = function (ind.p = ind.p, DB.matrix, size.min = 15, gene.common,
   for (t1 in 2:ncol(ind.p)) {
     set.common = intersect(set.common, rownames(out[[t1]]$pvalue.set.0))
   }
-  pvalue.B.array = array(data = NA, dim = c(length(set.common), 
+  pvalue.B.array = array(data = NA, dim = c(length(set.common),
                                             nperm, ncol(ind.p)))
-  dimnames(pvalue.B.array) = list(set.common, paste("perm", 
+  dimnames(pvalue.B.array) = list(set.common, paste("perm",
                                                     1:nperm, sep = ""), colnames(ncol(ind.p)))
   pvalue.0.mtx = matrix(NA, length(set.common), ncol(ind.p))
   qvalue.0.mtx = matrix(NA, length(set.common), ncol(ind.p))
@@ -1961,10 +2017,10 @@ MAPE_P_KS_gene = function (ind.p = ind.p, DB.matrix, size.min = 15, gene.common,
   }
   else if (stat == "Fisher") {
     DF = 2 * ncol(ind.p)
-    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) pchisq(-2 * 
+    P.0 = as.matrix(apply(pvalue.0.mtx, 1, function(x) pchisq(-2 *
                                                                 sum(log(x)), DF, lower.tail = T)))
     rownames(P.0) = rownames(qvalue.0.mtx)
-    P.B = apply(pvalue.B.array, c(1, 2), function(x) pchisq(-2 * 
+    P.B = apply(pvalue.B.array, c(1, 2), function(x) pchisq(-2 *
                                                               sum(log(x)), DF, lower.tail = T))
     rownames(P.B) = rownames(qvalue.0.mtx)
   }
@@ -1972,15 +2028,15 @@ MAPE_P_KS_gene = function (ind.p = ind.p, DB.matrix, size.min = 15, gene.common,
     stop("Please check: the selection of stat should be one of the following options: maxP,minP,rth and Fisher")
   }
   meta.out = pqvalues.compute(P.0, P.B, Stat.type = "Pvalue")
-  return(list(pvalue.meta = meta.out$pvalue.0, qvalue.meta = meta.out$qvalue.0, 
-              pvalue.meta.B = meta.out$pvalue.B, qvalue.set.study = qvalue.0.mtx, 
+  return(list(pvalue.meta = meta.out$pvalue.0, qvalue.meta = meta.out$qvalue.0,
+              pvalue.meta.B = meta.out$pvalue.B, qvalue.set.study = qvalue.0.mtx,
               pvalue.set.study = pvalue.0.mtx))
- }
+}
 
 
 ########################
 MAPE_G_Exact_DE = function (ind.p = ind.p,DB.matrix,gene.common,stat = NULL, rth.value = NULL,
-                            size.min = 15, size.max = 500,DEgene.number) 
+                            size.min = 15, size.max = 500,DEgene.number)
 {
   if (stat == "maxP") {
     P.0 = as.matrix(apply(ind.p, 1, max))
@@ -2004,7 +2060,9 @@ MAPE_G_Exact_DE = function (ind.p = ind.p,DB.matrix,gene.common,stat = NULL, rth
     pvalue.meta = pchisq(P.0,DF,lower.tail = F)
   }
   else if (stat == "AW Fisher") {
-    pvalue.meta = matrix(aw.fisher.pvalue(ind.p, method="original", weight.matrix=T)$pvalues,ncol = 1)
+    AW.fisher = aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)
+    pvalue.meta = matrix(AW.fisher$pvalues,ncol = 1)
+    weights.meta = AW.fisher$weights
     rownames(pvalue.meta) = rownames(ind.p)
   }
   else {
@@ -2027,24 +2085,28 @@ MAPE_G_Exact_DE = function (ind.p = ind.p,DB.matrix,gene.common,stat = NULL, rth
     ####not in the gene list but in the pathway
     count_table[2,1]<-sum(genes.in.study%in% colnames(DB.matrix[,DB.matrix[i,]==1]))
     ####not in the gene list and not in the pathway
-    count_table[2,2]<-length(genes.in.study)-count_table[2,1]       
+    count_table[2,2]<-length(genes.in.study)-count_table[2,1]
     if(length(count_table)==4){
       pvalue.0[i,1] <- fisher.test(count_table, alternative="greater")$p}
   }
   #  pvalue.0 = pvalue.0[pvalue.0[,1]!=1,,drop=FALSE]
   qvalue.0 = matrix(p.adjust(pvalue.0[,1], "BH"),ncol = 1)
   rownames(qvalue.0) = rownames(pvalue.0)
-  pvalue.set.0 = pvalue.0 
+  pvalue.set.0 = pvalue.0
   qvalue.set.0 = as.matrix(p.adjust(pvalue.0,"BH"),ncol = 1)
   rownames(qvalue.set.0) = rownames(pvalue.0)
-  return(list(pvalue.meta = pvalue.set.0, qvalue.meta = qvalue.set.0))
+  if(stat == "AW Fisher"){
+    return(list(pvalue.meta = pvalue.set.0, qvalue.meta = qvalue.set.0, AW.weights = weights.meta))
+  }else{
+    return(list(pvalue.meta = pvalue.set.0, qvalue.meta = qvalue.set.0))
+  }
 }
 
 
 
 #########################
 MAPE_G_KS_gene = function (ind.p=ind.p,DB.matrix,gene.common,stat,rth.value,
-                         size.min = 15, size.max = 500,nperm) 
+                           size.min = 15, size.max = 500,nperm)
 {
   if (stat == "maxP") {
     P.0 = as.matrix(apply(ind.p, 1, max))
@@ -2068,7 +2130,9 @@ MAPE_G_KS_gene = function (ind.p=ind.p,DB.matrix,gene.common,stat,rth.value,
     pvalue.meta = pchisq(P.0,DF,lower.tail = F)
   }
   else if (stat == "AW Fisher") {
-    pvalue.meta = matrix(aw.fisher.pvalue(ind.p, method="original", weight.matrix=T)$pvalues,ncol = 1)
+    AW.fisher = aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)
+    pvalue.meta = matrix(AW.fisher$pvalues,ncol = 1)
+    weights.meta = AW.fisher$weights
     rownames(pvalue.meta) = rownames(ind.p)
   }
   else {
@@ -2083,7 +2147,7 @@ MAPE_G_KS_gene = function (ind.p=ind.p,DB.matrix,gene.common,stat,rth.value,
   order.mtx.1 = t(apply(order.mtx.1, 1, function(x) x/sum(x)))
   order.mtx.0 = -t(apply(order.mtx.0, 1, function(x) x/sum(x)))
   order.mtx = order.mtx.0 + order.mtx.1
-  ES.0 = as.matrix(apply(t(apply(order.mtx, 1, cumsum)), 1, 
+  ES.0 = as.matrix(apply(t(apply(order.mtx, 1, cumsum)), 1,
                          max))
   ES.B = matrix(NA, nrow(ES.0), nperm)
   for (t1 in 1:nperm) {
@@ -2101,15 +2165,20 @@ MAPE_G_KS_gene = function (ind.p=ind.p,DB.matrix,gene.common,stat,rth.value,
   N.Y = ncol(set2allgenes.mtx) - N.X
   N = N.X * N.Y/(N.X + N.Y)
   enrich.out = pqvalues.compute(ES.0, ES.B, Stat.type = "Tstat")
-  return(list(pvalue.meta = enrich.out$pvalue.0, pvalue.meta.B = enrich.out$pvalue.B, 
-              qvalue.meta = enrich.out$qvalue.0))
+  if(stat == "AW Fisher"){
+    return(list(pvalue.meta = enrich.out$pvalue.0, pvalue.meta.B = enrich.out$pvalue.B,
+                qvalue.meta = enrich.out$qvalue.0,AW.weights = weights.meta))
+  }else{
+    return(list(pvalue.meta = enrich.out$pvalue.0, pvalue.meta.B = enrich.out$pvalue.B,
+                qvalue.meta = enrich.out$qvalue.0))
+  }
 }
 
 
 
 #########################
 MAPE_G_KS_DE = function (ind.p=ind.p,DB.matrix,gene.common,stat,rth.value,
-                           size.min = 15, size.max = 500) 
+                         size.min = 15, size.max = 500)
 {
   if (stat == "maxP") {
     P.0 = as.matrix(apply(ind.p, 1, max))
@@ -2133,7 +2202,9 @@ MAPE_G_KS_DE = function (ind.p=ind.p,DB.matrix,gene.common,stat,rth.value,
     pvalue.meta = pchisq(P.0,DF,lower.tail = F)
   }
   else if (stat == "AW Fisher") {
-    pvalue.meta = matrix(aw.fisher.pvalue(ind.p, method="original", weight.matrix=T)$pvalues,ncol = 1)
+    AW.fisher = aw.fisher.pvalue(pvalue.0.mtx, method="original", weight.matrix=T)
+    pvalue.meta = matrix(AW.fisher$pvalues,ncol = 1)
+    weights.meta = AW.fisher$weights
     rownames(pvalue.meta) = rownames(ind.p)
   }
   else {
@@ -2152,12 +2223,16 @@ MAPE_G_KS_DE = function (ind.p=ind.p,DB.matrix,gene.common,stat,rth.value,
   order.mtx.1 = t(apply(order.mtx.1, 1, function(x) x/sum(x)))
   order.mtx.0 = -t(apply(order.mtx.0, 1, function(x) x/sum(x)))
   order.mtx = order.mtx.0 + order.mtx.1
-  ES.0 = as.matrix(apply(t(apply(order.mtx, 1, cumsum)), 1, 
+  ES.0 = as.matrix(apply(t(apply(order.mtx, 1, cumsum)), 1,
                          max))
   pvalue.0 = matrix(exp(-2*nn*(ES.0[,1]^2)), ncol = 1)
   rownames(pvalue.0) = rownames(ES.0)
-  pvalue.set.0 = pvalue.0 
+  pvalue.set.0 = pvalue.0
   qvalue.set.0 = as.matrix(p.adjust(pvalue.0,"BH"),ncol = 1)
   rownames(qvalue.set.0) = rownames(pvalue.0)
-  return(list(pvalue.meta = pvalue.set.0, qvalue.meta = qvalue.set.0))
+  if(stat == "AW Fisher"){
+    return(list(pvalue.meta = pvalue.set.0, qvalue.meta = qvalue.set.0, AW.weights = weights.meta))
+  }else{
+    return(list(pvalue.meta = pvalue.set.0, qvalue.meta = qvalue.set.0))
+  }
 }

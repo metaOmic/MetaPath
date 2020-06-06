@@ -29,21 +29,16 @@ This is the second major function in the MetaPath2.0 package which calculates th
 cohen's kappa statistics between significant pathway analysis results.
 }
 \examples{
-data(clinical)
-data(Leukemia_v2)
+data(Psychiatry_disease_filtered)
 data(pathways)
-select.group <- c('inv(16)','t(15;17)')
-ref.level <- "inv(16)"
-data.type <- "continuous"
-ind.method <- c('limma','limma','limma')
-resp.type <- "twoclass"
-MAPE2.0_result = MAPE2.0(arraydata = Leukemia,clinical.data = clinical,label = "label",
-                        resp.type=resp.type,stat='maxP',method = "CPI", enrichment = "Fisher's exact", 
-                        DEgene.number = 400,size.min=15,size.max=500,data.type=data.type,
-                        ind.method=ind.method,ref.level=ref.level,select.group=select.group, paired)
-MAPE.kappa_result = MAPE.Kappa(summary = MAPE2.0_result$summary, software = MAPE2.0_result$method,
-                               pathway = MAPE2.0_result$pathway, max_k = 10, q_cutoff = 0.0005,
-                               output_dir = tempdir())
+CPI_result = MAPE2.0(arraydata = Psychiatry_diseases$expr, clinical.data = Psychiatry_diseases$clinical,
+                    label = "response",pmtx = NULL,pathway = c(Biocarta.genesets,GOBP.genesets,GOCC.genesets,GOMF.genesets,
+                    KEGG.genesets,Reactome.genesets),data.type ="continuous", resp.type = "twoclass",method = "CPI",
+                    ind.method = rep("limma",length(Psychiatry_diseases$expr)),paired = rep(FALSE,length(Psychiatry_diseases$expr)),
+                    select.group = c("CASE","CTRL"),ref.level ="CTRL",tail="abs",
+                    enrichment = "Fisher's exact", DEgene.number = 400,stat = "AW Fisher")
+CPI.kappa_result = MAPE.Kappa(summary = CPI_result$summary,pathway = CPI_result$pathway,
+                              max_k = 15, q_cutoff = 0.0005,software = CPI_result$method)
 }
 \author{
 Chien-wei Lin and George Tseng.

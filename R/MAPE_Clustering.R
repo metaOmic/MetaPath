@@ -7,23 +7,16 @@
 ##' @authors Zhou Fang, Xiangrui Zeng, Wei Zong and George Tseng.
 ##' @export
 ##' @examples
-##' data(clinical)
-##' data(Leukemia_v2)
+##' data(Psychiatry_disease_filtered)
 ##' data(pathways)
-##' select.group <- c('inv(16)','t(15;17)')
-##' ref.level <- "inv(16)"
-##' data.type <- "continuous"
-##' ind.method <- c('limma','limma','limma')
-##' resp.type <- "twoclass"
-##' MAPE2.0_result = MAPE2.0(arraydata = Psychiatry_diseases$expr, clinical.data = Psychiatry_diseases$clinical, label = "response",pmtx = NULL,
-##'                         pathway = c(Biocarta.genesets,GOBP.genesets,GOCC.genesets,GOMF.genesets,KEGG.genesets,Reactome.genesets),
-##'                         data.type ="continuous", resp.type = "twoclass",method = "CPI",
-##'                         ind.method = rep("limma",length(Psychiatry_diseases$expr)),paired = rep(FALSE,length(Psychiatry_diseases$expr)),
-##'                         select.group = c("CASE","CTRL"),ref.level ="CTRL",tail="abs",
-##'                         enrichment = "Fisher's exact", DEgene.number = 400,stat = "AW Fisher")
-##' MAPE.kappa_result = MAPE.Kappa(summary = CPI_result$summary,
-##'                                pathway = CPI_result$pathway, max_k = 15, q_cutoff = 0.0005,
-##'                                software = CPI_result$method)
+##' CPI_result = MAPE2.0(arraydata = Psychiatry_diseases$expr, clinical.data = Psychiatry_diseases$clinical,
+##'                     label = "response",pmtx = NULL,pathway = c(Biocarta.genesets,GOBP.genesets,GOCC.genesets,GOMF.genesets,
+##'                     KEGG.genesets,Reactome.genesets),data.type ="continuous", resp.type = "twoclass",method = "CPI",
+##'                     ind.method = rep("limma",length(Psychiatry_diseases$expr)),paired = rep(FALSE,length(Psychiatry_diseases$expr)),
+##'                     select.group = c("CASE","CTRL"),ref.level ="CTRL",tail="abs",
+##'                     enrichment = "Fisher's exact", DEgene.number = 400,stat = "AW Fisher")
+##' CPI.kappa_result = MAPE.Kappa(summary = CPI_result$summary,pathway = CPI_result$pathway,
+##'                               max_k = 15, q_cutoff = 0.0005,software = CPI_result$method)
 ##' MAPE.Clustering(MAPE.Clustering(summary=CPI_result$summary,Num_Clusters = 8,
 ##'                                 kappa.result = CPI.kappa_result$kappa,sil_cut=0.1,
 ##'                                 Num_of_gene_lists=CPI_result$Num_of_gene_lists,genelist =CPI_result$genelist,
@@ -608,7 +601,7 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
   ##### Hierarchical Clustering
   #=============================
   pdf("CPI_hclust_average.pdf",width = 7.5,height = 7.5)
-  cluster.num = c("I","II","III","IV","V","VI","VII","VIII")
+  cluster.num = 1:length(unique(results2))
   par(mfrow=c(3,3))
   for (c in 1:length(unique(results2))){
     pathways = names(results2)[which(results2==c)]

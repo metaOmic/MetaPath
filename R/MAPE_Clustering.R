@@ -245,7 +245,12 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
       else if (length(e)<=200) 16
       else 17)
   kappa = kappa.result[e, e] #dissimilarity
-  colorbar <- as.character( results2[order(results2)]+1 )
+  colorIndex = results2[order(results2)]
+
+  set.seed(1)
+  nCol = max(results2)-1
+  colOption = c(sample(rainbow(nCol),nCol),"black")
+  colorbar = mapvalues(colorIndex,from = 1:(nCol+1),to = colOption)
 
   if(length(unique(as.vector(kappa))) != 1){
     overlap.matrix = matrix(0, nrow = length(e), ncol = length(e))
@@ -307,7 +312,12 @@ MAPE.Clustering <- function(summary,Num_Clusters = 3, kappa.result = kappa.resul
   #heatmap for all clusters
   #================================
   e = names(results2)
-  colorbar <- as.character(results2+1 )
+  colorIndex = results2[order(results2)]
+
+  set.seed(1)
+  nCol = max(results2)-1
+  colOption = c(sample(rainbow(nCol),nCol),"black")
+  colorbar = mapvalues(colorIndex,from = 1:(nCol+1),to = colOption)
 
   png(paste(output_clustering,"/Heatmap_clusters_all",".png",sep=""),
        height = if (length(e)<=40)  600

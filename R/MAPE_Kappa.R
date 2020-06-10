@@ -18,6 +18,9 @@
 ##'                     ind.method = rep("limma",length(Psychiatry_diseases$expr)),paired = rep(FALSE,length(Psychiatry_diseases$expr)),
 ##'                     select.group = c("CASE","CTRL"),ref.level ="CTRL",tail="abs",
 ##'                     enrichment = "Fisher's exact", DEgene.number = 400,stat = "AW Fisher")
+##' library(irr)
+##' library(ConsensusClusterPlus)
+##' set.seed(15213)
 ##' CPI.kappa_result = MAPE.Kappa(summary = CPI_result$summary,pathway = CPI_result$pathway,
 ##'                               max_k = 15, q_cutoff = 0.0005,software = CPI_result$method)
 

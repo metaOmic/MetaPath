@@ -3,6 +3,8 @@
 
 ##' @title Output pathway cluster results
 ##' @param Num_Clusters number of clusters
+##' @param n.text.permute text mining permutation times
+##' @param sil_cut silhouette cutoff to determinie cluster tightness
 ##' @return The pathway cluster results in a csv file.
 ##' @authors Zhou Fang, Xiangrui Zeng, Wei Zong and George Tseng.
 ##' @export
@@ -22,6 +24,9 @@
 ##' set.seed(15213)
 ##' CPI.kappa_result = MAPE.Kappa(summary = CPI_result$summary,pathway = CPI_result$pathway,
 ##'                               max_k = 15, q_cutoff = 0.0005,software = CPI_result$method)
+##' library(cluster)
+##' library(gplots)
+##' library(shape)
 ##' data(hashtb)
 ##' set.seed(15213)
 ##' MAPE.Clustering(MAPE.Clustering(summary=CPI_result$summary,Num_Clusters = 8,

@@ -15,4 +15,5 @@ BiocManager::install("AnnotationDbi")
 BiocManager::install("Rgraphviz")
 
 devtools::install_github("metaOmics/MetaDE")
+devtools::install_github("metaOmics/MetaPath")
 `

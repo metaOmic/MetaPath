@@ -17,6 +17,7 @@
 ##'                     enrichment = "Fisher's exact", DEgene.number = 400,stat = "AW Fisher")
 ##' CPI.kappa_result = MAPE.Kappa(summary = CPI_result$summary,pathway = CPI_result$pathway,
 ##'                               max_k = 15, q_cutoff = 0.0005,software = CPI_result$method)
+##' set.seed(15213)
 ##' MAPE.Clustering(MAPE.Clustering(summary=CPI_result$summary,Num_Clusters = 8,
 ##'                                 kappa.result = CPI.kappa_result$kappa,sil_cut=0.1,
 ##'                                 Num_of_gene_lists=CPI_result$Num_of_gene_lists,genelist =CPI_result$genelist,
